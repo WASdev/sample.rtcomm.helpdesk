@@ -1,0 +1,8 @@
+<div class="session-manager">
+	<!--  div class="btn-group pull-left" style='padding: 10px'>  -->
+	<div class="btn-group pull-left" style='padding: 10px'>
+        <div>
+			<button ng-repeat="session in sessions" class='btn btn-default' ng-click="activateSession(session.endpointUUID)">{{session.remoteEndpointID}}</button>
+        </div>
+	</div>
+</div>
