@@ -1,0 +1,10 @@
+{
+    "server" : "svt-msd4.rtp.raleigh.ibm.com",
+	"port" : 1883,
+	"rtcommTopicPath" : "/rtcomm-helpdesk/",
+    "createEndpoint" : false,
+    "userid" : "Brian Pulito",
+    "appContext" : "rtcommHelpdesk",
+	"broadcastAudio" : true,
+	"broadcastVideo" : true
+}

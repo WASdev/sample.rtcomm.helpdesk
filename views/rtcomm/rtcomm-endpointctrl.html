@@ -1,0 +1,11 @@
+<div class="endpoint-controls">
+	<div class="btn-group pull-left" style='padding: 10px' ng-model="epCtrlConnected">
+		<button id="btnDisconnectEndpoint" class='btn  btn-primary' ng-click="disconnect()" ng-disabled=!epCtrlConnected>Disconnect</button>
+		<button id="btnEnableAV" class='btn  btn-primary' ng-click="toggleAV()" focusInput=true ng-disabled=!epCtrlConnected>
+			<span>{{epCtrlAVConnected ? 'Disable A/V' : 'Enable A/V'}}</span>
+		</button>
+	</div>
+	<p class="endpoint-controls-title navbar-text pull-right ">
+			<span>{{epCtrlConnected ? 'Connected to ' + epCtrlRemoteEndpointID : 'Disconnected'}}</span>
+	</p>
+</div>
