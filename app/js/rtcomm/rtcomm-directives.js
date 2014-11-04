@@ -138,6 +138,24 @@ rtcommApp.directive('rtcommQueues', ['RtcommService', function(RtcommService) {
 	};
 }]);
 
+rtcommApp.directive('rtcommPresence', ['RtcommService', function(RtcommService) {
+	return {
+		restrict : 'E',
+		templateUrl : '../views/rtcomm/rtcomm-presence.html',
+		controller : function($scope) {
+			$scope.users = [{name: 'Scott Graham'},
+			                {name: 'Brian Pulito'},
+			                {name: 'Jim Lawwill'},
+			                {name: 'Tibor Beres'},
+			                {name: 'Segio Costa'}
+			                ];
+			$scope.init = function(myName){
+				$scope.title = title;
+		  };
+		},
+		controllerAs : 'presence'
+	};
+}]);
 
 /********************** Endpoint Directives *******************************/
 

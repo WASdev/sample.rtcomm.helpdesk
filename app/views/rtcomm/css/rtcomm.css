@@ -35,6 +35,26 @@
  	width:100%;
     z-index: 1;
 }
+/* Presence related css */
+
+.presence {
+ 	list-style: none;
+ 	font-size: 1em;
+ 	font-family: Arial;
+    margin: 0;
+    padding: 0;
+}
+.presence li {
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px dotted #B3A9A9;
+}
+
+.presence .active {
+	color: greenyellow;
+	/*background: transparent url(rtcdojo/images/mobile_video_pal16.gif) no-repeat center left; */
+	cursor: pointer; cursor: hand;
+}
 
 /* Chat related css */
 .chat
