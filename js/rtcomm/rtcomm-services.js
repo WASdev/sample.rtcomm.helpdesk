@@ -13,7 +13,8 @@ rtcommApp.factory('RtcommConfig', function rtcommConfigFactory(){
 		    port : 1883,
 	    	rtcommTopicPath : "/rtcomm/",
 		    createEndpoint : false,
-            appContext: 'rtcommHelpdesk'
+            appContext: 'rtcommHelpdesk',
+            userid: ''
 		  };
 
 	  var endpointConfig = {
@@ -197,7 +198,7 @@ rtcommApp.factory('RtcommService', function ($rootScope, RtcommConfig) {
 	 	});
 	  
 	  var initSuccess = function(event) {
-		console.log('Endpoint provider: inited: event:', event);
+		console.log('<<------rtcomm-service------>> - Event: Provider init succeeded');
  		$rootScope.$evalAsync(
  				function () {
 					var broadcastEvent = {
@@ -207,16 +208,16 @@ rtcommApp.factory('RtcommService', function ($rootScope, RtcommConfig) {
 						  'userid' : RtcommConfig.getProviderConfig().userid
 						  };
 			
-					$rootScope.$broadcast('init', true, broadcastEvent);
+					$rootScope.$broadcast('rtcomm::init', true, broadcastEvent);
  				}
 			);
 	  };
 
 	  var initFailure = function(error) {
-        console.log('Endpoint provider: init failed: error: ',error);
+        console.log('<<------rtcomm-service------>> - Event: Provider init failed: error: ',error);
  		$rootScope.$evalAsync(
  				function () {
-			        $rootScope.$broadcast('init', false, error);
+			        $rootScope.$broadcast('rtcomm::init', false, error);
 			}
 		);
      };
@@ -244,7 +245,10 @@ rtcommApp.factory('RtcommService', function ($rootScope, RtcommConfig) {
 				myEndpointProvider.setRtcommEndpointConfig(getMediaConfig());
 
 				if (endpointProviderInitialized == false){
-					if (RtcommConfig.getProviderConfig().userid != ''){
+					// If the user does not specify a userid, that says one will never be specified so go ahead
+					// and initialize the endpoint provider and let the provider assign a name. If a defined empty
+					// string is passed in, that means to wait until the end user registers a name.
+					if (typeof config.userid == "undefined" || RtcommConfig.getProviderConfig().userid != ''){
 						  myEndpointProvider.init(RtcommConfig.getProviderConfig(), initSuccess, initFailure);
 						  endpointProviderInitialized = true;
 					}
@@ -276,10 +280,17 @@ rtcommApp.factory('RtcommService', function ($rootScope, RtcommConfig) {
 				   endpointProviderInitialized = true;
 			   }
 			   else
-				   console.log('rtcomm-services: ERROR: endpoint provider already initialized');
+				   console.log('rtcomm-services: register: ERROR: endpoint provider already initialized');
 		   },
 
 		   unregister : function() {
+			   if (endpointProviderInitialized == true){
+				   myEndpointProvider.destroy();
+				   endpointProviderInitialized = false;
+				   initFailure("destroyed");
+			   }
+			   else
+				   console.log('rtcomm-services: unregister: ERROR: endpoint provider not initialized');
 		   },
 		   
 		   // Queue related methods

@@ -57,12 +57,17 @@
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
             <li class="active"><a href="helpDeskSample.html">Home</a></li>
-            <li>
-            	<a href="#" ng-click="onDisplayCallModal()">Helpdesk</a>
-            </li>
+	       	<li>
+	       		<!-- a href="#" ng-click="onDisplayCallModal()" ng-disabled=!enableCallModel>Helpdesk</a -->
+	       	</li>
           </ul>
+	      <li>
+	      	<button id="btn-helpdesk" class='pull-right btn btn-default navbar-btn' ng-click="onDisplayCallModal()" ng-disabled=!enableCallModel>Helpdesk</button>
+	      </li>
         </div>
       </div>
+      
+      
 	 <rtcomm-call-modal ng-init="init('Appliances')"></rtcomm-call-modal>
      </div>
 

@@ -3,7 +3,7 @@
 	"port" : 1883,
 	"rtcommTopicPath" : "/rtcomm-helpdesk/",
     "createEndpoint" : false,
-    "userid" : "Brian Pulito",
+    "userid" : "",
     "appContext" : "rtcommHelpdesk",
 	"broadcastAudio" : true,
 	"broadcastVideo" : true

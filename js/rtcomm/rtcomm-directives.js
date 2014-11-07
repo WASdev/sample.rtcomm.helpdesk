@@ -4,6 +4,11 @@
 
 /************* Endpoint Provider Directives *******************************/
 
+/**
+ * This directive is used to manage multiple sessions. If you are only supporting at most one session you wont need 
+ * this directive. The associated template provides a way to switch between active sessions. The session must be in
+ * the started state to be managed by this directive and is removed when the session stops.
+ */
 rtcommApp.directive('rtcommSessionmgr', ['RtcommService', function(RtcommService) {
     return {
       restrict: 'E',
@@ -96,7 +101,11 @@ rtcommApp.directive('rtcommSessionmgr', ['RtcommService', function(RtcommService
     };
 }]);
 
-
+/**
+ * This directive is used to manage the registration of an endpoint provider. Since the registered name can only
+ * be set on initialization of the endpoint provider, this directive actually controls the initialization of the
+ * provider. Note that the endpoint provider must be initialized before any sessions can be created or received.
+ */
 rtcommApp.directive('rtcommRegister', ['RtcommService', function(RtcommService) {
     return {
       restrict: 'E',
@@ -113,10 +122,11 @@ rtcommApp.directive('rtcommRegister', ['RtcommService', function(RtcommService) 
           }
           else {
               console.log('Unregister: reguserid =' + $scope.reguserid);
+              RtcommService.unregister();
           }
         };
 
-        $scope.$on('init', function (event, success, details) {
+        $scope.$on('rtcomm::init', function (event, success, details) {
 
 			if (success == true){
 				$scope.nextAction = 'Unregister';
@@ -124,7 +134,11 @@ rtcommApp.directive('rtcommRegister', ['RtcommService', function(RtcommService) 
 			}
 			else{
 				$scope.nextAction = 'Register';
-				$scope.reguserid = 'Rtcomm init failed';
+				
+				if (details == 'destroyed')
+					$scope.reguserid = null;
+				else
+					$scope.reguserid = 'Init failed:' +  details;
 			}
         });
       },
@@ -132,6 +146,11 @@ rtcommApp.directive('rtcommRegister', ['RtcommService', function(RtcommService) 
     };
 }]);
 
+/**
+ * This directive manages call queues. It provides the ability to display all the available queues
+ * (along with their descriptions) and by clicking on a queue, allows an agent (or any type of user)
+ * to subscribe on that queue.
+ */
 rtcommApp.directive('rtcommQueues', ['RtcommService', function(RtcommService) {
 	return {
 		restrict : 'E',
@@ -146,6 +165,13 @@ rtcommApp.directive('rtcommQueues', ['RtcommService', function(RtcommService) {
 				});
 				console.log('queues', queues);
 			});
+			
+	        $scope.$on('rtcomm::init', function (event, success, details) {
+
+				if (success == false){
+					$scope.rQueues = [];
+				}
+	        });
 
 			$scope.onQueueClick = function(queue){
 				var index;
@@ -173,8 +199,10 @@ rtcommApp.directive('rtcommQueues', ['RtcommService', function(RtcommService) {
 
 /********************** Endpoint Directives *******************************/
 
-/*
- * This directive is a container for all the endpoint related directives.
+/**
+ * This directive is a container for all the endpoint related directives. It provides some
+ * control over the display of the container if that is needed but for the most part it is
+ * needed for containment and layout of all the directives related to a single endpoint session.
  */
 rtcommApp.directive('rtcommEndpoint', ['RtcommService', function(RtcommService) {
     return {
@@ -208,6 +236,11 @@ rtcommApp.directive('rtcommEndpoint', ['RtcommService', function(RtcommService) 
       };
 }]);
 
+/**
+ * This directive is used for all the controls related to a single endpoint session. This includes
+ * the ability to disconnect the sesssion and the ability to enable A/V for sessions that don't start
+ * with A/V. This directive also maintains the enabled and disabled states of all its related controls.
+ */
 rtcommApp.directive('rtcommEndpointctrl', ['RtcommService', function(RtcommService) {
     return {
         restrict: 'E',
@@ -284,6 +317,10 @@ rtcommApp.directive('rtcommEndpointctrl', ['RtcommService', function(RtcommServi
       };
 }]);
 
+/**
+ * This directive manages the WebRTC video screen, including both the self view and the remote view. It
+ * also takes care of switching state between endpoints based on which endpoint is "actively" being viewed.
+ */
 rtcommApp.directive('rtcommVideo', ['RtcommService', function(RtcommService) {
     return {
       restrict: 'E',
@@ -312,7 +349,9 @@ rtcommApp.directive('rtcommVideo', ['RtcommService', function(RtcommService) {
 }]);
 
 /**
- * 
+ * This directive manages the chat portion of a session. The data model for chat
+ * is maintained in the RtcommService. This directive handles switching between
+ * active endpoints.
  */
 rtcommApp.directive("rtcommChat", ['RtcommService', function(RtcommService) {
     return {
@@ -370,7 +409,8 @@ rtcommApp.controller('ModalController', ['$scope', 'close', function($scope, clo
 }]);
 
 /**
- * This model is displayed on receiving an inbound call.
+ * This model is displayed on receiving an inbound call. It handles the alerting event.
+ * Note that it can also auto accept requests for enabling A/V.
  */
 rtcommApp.directive('rtcommAlert', ['RtcommService', 'ModalService', function(RtcommService, ModalService) {
     return {
@@ -434,16 +474,37 @@ rtcommApp.directive('rtcommAlert', ['RtcommService', 'ModalService', function(Rt
 }]);
 
 /**
- * This is the controller that displays the call modal from a menu or button click.
+ * This is the controller that displays the call modal from a menu or button click. Its designed to 
+ * be used in situations where the callee is known during initialization. This would be the case where
+ * a call is made to a queue instead of a person. Note that the call modal is currently disabled if there 
+ * is an active session.
  */
 rtcommApp.controller('RtcommCallModalController', function($scope){
 
     $scope.displayCallModal = false;
+    $scope.enableCallModel = false;
 
     $scope.onDisplayCallModal = function () {
 		console.log('RtcommCallModalController: onDisplayCallModal');
         $scope.displayCallModal = true;
     };
+
+    $scope.$on('rtcomm::init', function (event, success, details) {
+		console.log('RtcommCallModalController: rtcomm::init: success = ' + success);
+	   	 if (success == true)
+	   		 $scope.enableCallModel = true;
+	   	 else
+	   		 $scope.enableCallModel = false;
+   });
+    
+	$scope.$on('session:started', function (event, eventObject) {
+	    $scope.enableCallModel = false;
+    });
+
+	$scope.$on('session:stopped', function (event, eventObject) {
+	    $scope.enableCallModel = true;
+    });
+
 });
 
 /**
@@ -485,7 +546,7 @@ rtcommApp.directive('rtcommCallModal', ['RtcommService', 'ModalService', functio
                 	  $scope.showCallModal();
                   }
              });
-
+              
 		}
    };
 }]);
@@ -493,7 +554,25 @@ rtcommApp.directive('rtcommCallModal', ['RtcommService', 'ModalService', functio
 /********************************************* Rtcomm Controllers ******************************************************/
 
 /**
- * This is the controller for config loader.
+ * This is the controller for config loader. It reads a JSON object and utilizes the RtcommService to set the configuration.
+ * This can also result in the initialization of the endpoint provider if the config JSON object includes a registration name.
+ * 
+ * Here is an example of the config object:
+ * 
+ * {
+ *  "server" : "server address",
+ *	"port" : 1883,
+ *	"rtcommTopicPath" : "/rtcomm-helpdesk/",
+ *  "createEndpoint" : false,
+ *  "userid" : "registration name",
+ *	"broadcastAudio" : true,
+ *	"broadcastVideo" : true
+ * }
+ * 
+ * NOTE: If the user does not specify a userid, that says one will never be specified so go ahead
+ * and initialize the endpoint provider and let the provider assign a name. If a defined empty
+ * string is passed in, that means to wait until the end user registers a name before initializing
+ * the endpoint provider.
  */
 rtcommApp.controller('RtcommConfigController', ['$scope','$http', 'RtcommService', function($scope, $http, RtcommService){
 
