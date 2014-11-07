@@ -46,10 +46,28 @@ rtcommApp.directive('rtcommSessionmgr', ['RtcommService', function(RtcommService
 			
 	        $rootScope.$broadcast('endpointActivated', eventObject.endpoint.id);
         });
+		
+		$scope.$on('session:failed', function (event, eventObject) {
+			$scope.cleanupSession(eventObject.endpoint.id);
+        });
+
+		$scope.$on('session:rejected', function (event, eventObject) {
+			$scope.cleanupSession(eventObject.endpoint.id);
+        });
+
 
 		$scope.$on('session:stopped', function (event, eventObject) {
-			var id = eventObject.endpoint.id;
-			
+			$scope.cleanupSession(eventObject.endpoint.id);
+        });
+		
+        $scope.activateSession = function(endpointUUID) {
+            console.log('rtcommSessionmgr: activateEndpoint =' + endpointUUID);
+            if ($scope.sessMgrActiveEndpointUUID != endpointUUID){
+	            $rootScope.$broadcast('endpointActivated', endpointUUID);
+            }
+        };
+        
+		$scope.cleanupSession = function(id){
 			for	(var index = 0; index < $scope.sessions.length; index++) {
 			    if($scope.sessions[index].endpointUUID === id){
 		            RtcommService.getEndpoint(id).destroy();
@@ -67,15 +85,8 @@ rtcommApp.directive('rtcommSessionmgr', ['RtcommService', function(RtcommService
 			    	break;
 			    }
 			}
-        });
+		};
 
-        $scope.activateSession = function(endpointUUID) {
-            console.log('rtcommSessionmgr: activateEndpoint =' + endpointUUID);
-            if ($scope.sessMgrActiveEndpointUUID != endpointUUID){
-	            $rootScope.$broadcast('endpointActivated', endpointUUID);
-            }
-        };
-        
         $scope.getSession = function(endpointUUID) {
         	var session = null;
 			for	(var index = 0; index < $scope.sessions.length; index++) {
