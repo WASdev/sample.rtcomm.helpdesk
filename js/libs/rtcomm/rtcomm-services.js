@@ -1,12 +1,19 @@
 /**
- *
+ * Definition for the 
  */
-var rtcommApp = angular.module('rtcommApp', ['angularModalService']);
+var rtcommModule = angular.module('rtcommModule', ['angularModalService']);
+
+/**
+ * Set debugEnaled to true to enable the debug messages in this rtcomm angule module.
+ */
+rtcommModule.config(function($logProvider){
+	  $logProvider.debugEnabled(false);
+	});
 
 /**
  *
  */
-rtcommApp.factory('RtcommConfig', function rtcommConfigFactory(){
+rtcommModule.factory('RtcommConfig', function rtcommConfigFactory(){
 
 	var providerConfig = {
 		    server : 'svt-msd4.rtp.raleigh.ibm.com',
@@ -27,7 +34,6 @@ rtcommApp.factory('RtcommConfig', function rtcommConfigFactory(){
 
 	return {
 		setConfig : function(config){
-			console.log('RtcommConfig: setConfig: ');
 			providerConfig.server = (typeof config.server !== "undefined")? config.server : providerConfig.server;
 			providerConfig.port = (typeof config.port !== "undefined")? config.port : providerConfig.port;
 			providerConfig.rtcommTopicPath = (typeof config.rtcommTopicPath !== "undefined")? config.rtcommTopicPath : providerConfig.rtcommTopicPath;
@@ -57,17 +63,16 @@ rtcommApp.factory('RtcommConfig', function rtcommConfigFactory(){
 	};
 });
 
-rtcommApp.factory('RtcommService', function ($rootScope, RtcommConfig) {
-	  console.log('rtcommService: Creating the Rtcomm EnpdointProvider');
+rtcommModule.factory('RtcommService', function ($rootScope, RtcommConfig, $log) {
 
 	  /** Setup the endpoint provider first **/
 	  var myEndpointProvider = new ibm.rtcomm.RtcommEndpointProvider();
 	  var endpointProviderInitialized = false;
 	  var queueList = null;
 	  var sessions = [];
-
-	  myEndpointProvider.setLogLevel('DEBUG');
+	  
 	  /*
+	  myEndpointProvider.setLogLevel('DEBUG');
 	  myEndpointProvider.setLogLevel('MESSAGE');
 	  */
 
@@ -91,8 +96,8 @@ rtcommApp.factory('RtcommService', function ($rootScope, RtcommConfig) {
 
 
 	  myEndpointProvider.on('queueupdate', function(queuelist) {
-	 	  console.log('<<------rtcomm-service------>> - Event: queueupdate');
-		  console.log('queueupdate', queuelist);
+	 	  $log.debug('<<------rtcomm-service------>> - Event: queueupdate');
+		  $log.debug('queueupdate', queuelist);
 	 	  $rootScope.$evalAsync(
 	 				function () {
 					  $rootScope.$broadcast('queueupdate', queuelist);
@@ -101,7 +106,7 @@ rtcommApp.factory('RtcommService', function ($rootScope, RtcommConfig) {
 	  });
 
 	  myEndpointProvider.on('newendpoint', function(endpoint) {
-	 	  console.log('<<------rtcomm-service------>> - Event: newendpoint remoteEndpointID: ' + endpoint.getRemoteEndpointID());
+	 	  $log.debug('<<------rtcomm-service------>> - Event: newendpoint remoteEndpointID: ' + endpoint.getRemoteEndpointID());
 	 	  $rootScope.$evalAsync(
 	 				function () {
 					  $rootScope.$broadcast('newendpoint', endpoint);
@@ -110,7 +115,7 @@ rtcommApp.factory('RtcommService', function ($rootScope, RtcommConfig) {
 	  });
 
 	 var callback = function(eventObject) {
-	 		console.log('<<------rtcomm-service------>> - Event: ' + eventObject.eventName + ' remoteEndpointID: ' + eventObject.endpoint.getRemoteEndpointID());
+	 		$log.debug('<<------rtcomm-service------>> - Event: ' + eventObject.eventName + ' remoteEndpointID: ' + eventObject.endpoint.getRemoteEndpointID());
 	 		$rootScope.$evalAsync(
 	 				function () {
 		 				$rootScope.$broadcast(eventObject.eventName, eventObject);
@@ -123,7 +128,7 @@ rtcommApp.factory('RtcommService', function ($rootScope, RtcommConfig) {
 	
 		  // These are all the session related events.
 		  'session:started' : function(eventObject) {
-		 		console.log('<<------rtcomm-service------>> - Event: ' + eventObject.eventName + ' remoteEndpointID: ' + eventObject.endpoint.getRemoteEndpointID());
+		 		$log.debug('<<------rtcomm-service------>> - Event: ' + eventObject.eventName + ' remoteEndpointID: ' + eventObject.endpoint.getRemoteEndpointID());
 		 		$rootScope.$evalAsync(
 		 				function () {
 		 					getSession(eventObject.endpoint.id).sessionStarted = true;
@@ -138,7 +143,7 @@ rtcommApp.factory('RtcommService', function ($rootScope, RtcommConfig) {
 		  'session:rejected' : callback,
 		  
 		  'session:stopped' : function(eventObject) { 
-	  	 		console.log('<<------rtcomm-service------>> - Event: ' + eventObject.eventName + ' remoteEndpointID: ' + eventObject.endpoint.getRemoteEndpointID());
+	  	 		$log.debug('<<------rtcomm-service------>> - Event: ' + eventObject.eventName + ' remoteEndpointID: ' + eventObject.endpoint.getRemoteEndpointID());
 		 		$rootScope.$evalAsync(
 		 				function () {
 				  	 		//	Clean up existing data related to this session.
@@ -152,7 +157,7 @@ rtcommApp.factory('RtcommService', function ($rootScope, RtcommConfig) {
 		  
 		  // These are all the WebRTC related events.
 		  'webrtc:connected' : function(eventObject) {
-		 		console.log('<<------rtcomm-service------>> - Event: ' + eventObject.eventName + ' remoteEndpointID: ' + eventObject.endpoint.getRemoteEndpointID());
+		 		$log.debug('<<------rtcomm-service------>> - Event: ' + eventObject.eventName + ' remoteEndpointID: ' + eventObject.endpoint.getRemoteEndpointID());
 		 		
 		 		$rootScope.$evalAsync(
 		 				function () {
@@ -163,7 +168,7 @@ rtcommApp.factory('RtcommService', function ($rootScope, RtcommConfig) {
 			 	},
 			 	
 		  'webrtc:disconnected' : function(eventObject) {
-		 		console.log('<<------rtcomm-service------>> - Event: ' + eventObject.eventName + ' remoteEndpointID: ' + eventObject.endpoint.getRemoteEndpointID());
+		 		$log.debug('<<------rtcomm-service------>> - Event: ' + eventObject.eventName + ' remoteEndpointID: ' + eventObject.endpoint.getRemoteEndpointID());
 		 		
 		 		$rootScope.$evalAsync(
 		 				function () {
@@ -178,7 +183,7 @@ rtcommApp.factory('RtcommService', function ($rootScope, RtcommConfig) {
 		  'chat:disconnected' : callback,
 		  
 		  'chat:message' :  function(eventObject) { 
-	 		console.log('<<------rtcomm-service------>> - Event: ' + eventObject.eventName + ' remoteEndpointID: ' + eventObject.endpoint.getRemoteEndpointID());
+	 		$log.debug('<<------rtcomm-service------>> - Event: ' + eventObject.eventName + ' remoteEndpointID: ' + eventObject.endpoint.getRemoteEndpointID());
 	 		$rootScope.$evalAsync(
 	 				function () {
 					  		var chat = {
@@ -198,7 +203,7 @@ rtcommApp.factory('RtcommService', function ($rootScope, RtcommConfig) {
 	 	});
 	  
 	  var initSuccess = function(event) {
-		console.log('<<------rtcomm-service------>> - Event: Provider init succeeded');
+		$log.debug('<<------rtcomm-service------>> - Event: Provider init succeeded');
  		$rootScope.$evalAsync(
  				function () {
 					var broadcastEvent = {
@@ -214,7 +219,7 @@ rtcommApp.factory('RtcommService', function ($rootScope, RtcommConfig) {
 	  };
 
 	  var initFailure = function(error) {
-        console.log('<<------rtcomm-service------>> - Event: Provider init failed: error: ',error);
+        $log.debug('<<------rtcomm-service------>> - Event: Provider init failed: error: ',error);
  		$rootScope.$evalAsync(
  				function () {
 			        $rootScope.$broadcast('rtcomm::init', false, error);
@@ -239,8 +244,8 @@ rtcommApp.factory('RtcommService', function ($rootScope, RtcommConfig) {
 
 	  return {
 			setConfig : function(config){
-				console.log('RtcommService: setConfig: ');
-
+				$log.debug('rtcomm-services: setConfig: config: ', config);
+				
 				RtcommConfig.setConfig(config);
 				myEndpointProvider.setRtcommEndpointConfig(getMediaConfig());
 
@@ -256,7 +261,6 @@ rtcommApp.factory('RtcommService', function ($rootScope, RtcommConfig) {
 			},
 
 			getEndpoint : function(uuid) {
-			  console.log('RtcommService: getEndpoint: id = ' + uuid);
 			  var endpoint = null;
 
 			  if ((typeof uuid === "undefined") || uuid == null)
@@ -280,7 +284,7 @@ rtcommApp.factory('RtcommService', function ($rootScope, RtcommConfig) {
 				   endpointProviderInitialized = true;
 			   }
 			   else
-				   console.log('rtcomm-services: register: ERROR: endpoint provider already initialized');
+				   $log.error('rtcomm-services: register: ERROR: endpoint provider already initialized');
 		   },
 
 		   unregister : function() {
@@ -290,7 +294,7 @@ rtcommApp.factory('RtcommService', function ($rootScope, RtcommConfig) {
 				   initFailure("destroyed");
 			   }
 			   else
-				   console.log('rtcomm-services: unregister: ERROR: endpoint provider not initialized');
+				   $log.error('rtcomm-services: unregister: ERROR: endpoint provider not initialized');
 		   },
 		   
 		   // Queue related methods
