@@ -12,7 +12,7 @@
 rtcommApp.directive('rtcommSessionmgr', ['RtcommService', function(RtcommService) {
     return {
       restrict: 'E',
-      templateUrl: '../views/rtcomm/rtcomm-sessionmgr.html',
+      templateUrl: 'templates/rtcomm/rtcomm-sessionmgr.html',
       controller: function ($scope, $rootScope) {
 
 		$scope.sessions = [];
@@ -120,7 +120,7 @@ rtcommApp.directive('rtcommSessionmgr', ['RtcommService', function(RtcommService
 rtcommApp.directive('rtcommRegister', ['RtcommService', function(RtcommService) {
     return {
       restrict: 'E',
-      templateUrl: '../views/rtcomm/rtcomm-register.html',
+      templateUrl: 'templates/rtcomm/rtcomm-register.html',
       controller: function ($scope) {
 
     	$scope.nextAction = 'Register';
@@ -165,7 +165,7 @@ rtcommApp.directive('rtcommRegister', ['RtcommService', function(RtcommService) 
 rtcommApp.directive('rtcommQueues', ['RtcommService', function(RtcommService) {
 	return {
 		restrict : 'E',
-		templateUrl : '../views/rtcomm/rtcomm-queues.html',
+		templateUrl : 'templates/rtcomm/rtcomm-queues.html',
 		controller : function($scope) {
 			$scope.rQueues = [];
 
@@ -218,7 +218,7 @@ rtcommApp.directive('rtcommQueues', ['RtcommService', function(RtcommService) {
 rtcommApp.directive('rtcommEndpoint', ['RtcommService', function(RtcommService) {
     return {
         restrict: 'E',
-        templateUrl: '../views/rtcomm/rtcomm-endpoint.html',
+        templateUrl: 'templates/rtcomm/rtcomm-endpoint.html',
         transclude: 'true', // Allows other directives to be contained by this one.
         controller: function ($scope) {
 
@@ -255,7 +255,7 @@ rtcommApp.directive('rtcommEndpoint', ['RtcommService', function(RtcommService) 
 rtcommApp.directive('rtcommEndpointctrl', ['RtcommService', function(RtcommService) {
     return {
         restrict: 'E',
-        templateUrl: '../views/rtcomm/rtcomm-endpointctrl.html',
+        templateUrl: 'templates/rtcomm/rtcomm-endpointctrl.html',
         controller: function ($scope) {
         	
         	$scope.epCtrlActiveEndpointUUID = null;
@@ -335,7 +335,7 @@ rtcommApp.directive('rtcommEndpointctrl', ['RtcommService', function(RtcommServi
 rtcommApp.directive('rtcommVideo', ['RtcommService', function(RtcommService) {
     return {
       restrict: 'E',
-      templateUrl: '../views/rtcomm/rtcomm-video.html',
+      templateUrl: 'templates/rtcomm/rtcomm-video.html',
 
   		controller: function ($scope) {
 
@@ -367,7 +367,7 @@ rtcommApp.directive('rtcommVideo', ['RtcommService', function(RtcommService) {
 rtcommApp.directive("rtcommChat", ['RtcommService', function(RtcommService) {
     return {
       restrict: 'E',
-      templateUrl: "../views/rtcomm/rtcomm-chat.html",
+      templateUrl: "templates/rtcomm/rtcomm-chat.html",
       controller: function ($scope) {
 		  $scope.chats = [];
 		  $scope.chatActiveEndpointUUID = null;
@@ -440,7 +440,7 @@ rtcommApp.directive('rtcommAlert', ['RtcommService', 'ModalService', function(Rt
 
     	  	$scope.showAlerting = function() {
 				ModalService.showModal({
-		    		      templateUrl: "../views/rtcomm/rtcomm-modal-alert.html",
+		    		      templateUrl: "templates/rtcomm/rtcomm-modal-alert.html",
 		    		      controller: "ModalController"
 		    		    }).then(function(modal) {
 		    		      modal.element.modal();
@@ -533,7 +533,7 @@ rtcommApp.directive('rtcommCallModal', ['RtcommService', 'ModalService', functio
 
 		    $scope.showCallModal = function() {
 				ModalService.showModal({
-		    		      templateUrl: "../views/rtcomm/rtcomm-modal-call.html",
+		    		      templateUrl: "templates/rtcomm/rtcomm-modal-call.html",
 		    		      controller: "ModalController"
 		    		    }).then(function(modal) {
 		    		      modal.element.modal();

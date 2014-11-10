@@ -1,7 +1,9 @@
 {
-    "server" : "svt-msd4.rtp.raleigh.ibm.com",
+    "serverxxx" : "svt-msd4.rtp.raleigh.ibm.com",
+	"portxxx" : 1883,
+    "server" : "192.84.45.43",
 	"port" : 1883,
-	"rtcommTopicPath" : "/rtcomm-helpdesk/",
+	"rtcommTopicPath" : "/rtcomm-helpdesk-blp/",
     "createEndpoint" : false,
     "userid" : "",
     "appContext" : "rtcommHelpdesk",
