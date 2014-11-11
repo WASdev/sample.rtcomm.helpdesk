@@ -59,3 +59,11 @@ To enable debug tracing in the core rtcomm clientjs library, open the [rtcomm-se
 *myEndpointProvider.setLogLevel('DEBUG');*  
 *myEndpointProvider.setLogLevel('MESSAGE');*  
 
+## Library Versions
+This section outlines the lib versions currently contained in this sample application:
+
+* Rtcomm JavaScript lib - [Rtcomm Client 1.0.0 Beta 7](https://github.com/WASdev/lib.rtcomm.clientjs/releases/tag/v1.0.0-beta.7).  
+* AngularJS - v1.3.0-rc.3  
+* jQuery - v1.11.1  
+* Bootstrap - v3.2.0  
+
