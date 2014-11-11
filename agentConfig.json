@@ -1,0 +1,8 @@
+{
+    "server" : "192.84.45.43",
+	"port" : 1883,
+	"rtcommTopicPath" : "/rtcomm-helpdesk-blp/",
+    "userid" : "",
+	"broadcastAudio" : true,
+	"broadcastVideo" : true
+}
