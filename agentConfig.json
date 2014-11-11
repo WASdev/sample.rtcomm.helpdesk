@@ -2,9 +2,7 @@
     "server" : "192.84.45.43",
 	"port" : 1883,
 	"rtcommTopicPath" : "/rtcomm-helpdesk-blp/",
-    "createEndpoint" : false,
     "userid" : "",
-    "appContext" : "rtcommHelpdesk",
 	"broadcastAudio" : true,
 	"broadcastVideo" : true
 }
