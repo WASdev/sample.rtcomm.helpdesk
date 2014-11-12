@@ -167,11 +167,22 @@ rtcommModule.directive('rtcommQueues', ['RtcommService', '$log', function(Rtcomm
 		templateUrl : 'templates/rtcomm/rtcomm-queues.html',
 		controller : function($scope) {
 			$scope.rQueues = [];
+			$scope.autoJoinQueues = false;
+			
+			$scope.init = function(autoJoinQueues) {
+				$log.debug('rtcommQueues: autoJoinQueues = ' + autoJoinQueues);
+				$scope.autoJoinQueues = autoJoinQueues;
+    	  	};
 
 			$scope.$on('queueupdate', function(event, queues) {
 				$log.debug('scope queues', $scope.rQueues);
 				Object.keys(queues).forEach(function(key) {
 					$scope.rQueues.push(queues[key]);
+					
+					// If autoJoin we go ahead and join the queue as soon as we get the queue update.
+					if ($scope.autoJoinQueues == true){
+						$scope.onQueueClick(queues[key]);
+					}
 				});
 				$log.debug('queues', queues);
 			});
@@ -235,8 +246,19 @@ rtcommModule.directive('rtcommEndpoint', ['RtcommService', '$log', function(Rtco
 				$scope.displayEndpoint = true;
 	        });
 
+			$scope.$on('session:failed', function (event, eventObject) {
+				if ($scope.epActiveEndpointUUID == eventObject.endpoint.id){
+					$scope.displayEndpoint = false;
+				}
+	        });
+
+			$scope.$on('session:rejected', function (event, eventObject) {
+				if ($scope.epActiveEndpointUUID == eventObject.endpoint.id){
+					$scope.displayEndpoint = false;
+				}
+	        });
+
 			$scope.$on('session:stopped', function (event, eventObject) {
-			    $log.debug('endointActivated received: endpointID = ' + eventObject.endpoint.id);
 				if ($scope.epActiveEndpointUUID == eventObject.endpoint.id){
 					$scope.displayEndpoint = false;
 				}

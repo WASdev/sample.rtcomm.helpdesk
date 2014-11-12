@@ -4,7 +4,7 @@
 			<span class="glyphicon glyphicon-comment"></span> Available Queues
 		</div>
 		<div class='queueContainer'>
-	           <button type="button" ng-class="{'btn btn-primary btn-lg btn-block': queue.active, 'btn btn-default btn-lg btn-block': !queue.active}" ng-repeat="queue in rQueues" ng-click="onQueueClick(queue)" data-toggle="tooltip" data-placement="top" title="{{queue.description}}" >{{queue.endpointID}}</button>
+	           <button type="button" ng-class="{'btn btn-primary btn-lg btn-block': queue.active, 'btn btn-default btn-lg btn-block': !queue.active}" ng-repeat="queue in rQueues" ng-click="onQueueClick(queue)" data-toggle="tooltip" data-placement="top" title="{{queue.description}}" >{{queue.active ? 'Leave' : 'Join'}} {{queue.endpointID}}</button>
         </div>
 	</div>
 </div> 
