@@ -282,6 +282,7 @@ var generateUUID = function() {
 };
 
 
+
 /*
  * Copyright 2014 IBM Corp.
  *
@@ -420,6 +421,7 @@ var RtcommBaseObject = {
     }
 };
 
+
 /*
  * Copyright 2014 IBM Corp.
  *
@@ -442,9 +444,11 @@ var RtcommEvent = function RtcommEvent() {
 };
 
 
+
   return { Log: Log, RtcommBaseObject:RtcommBaseObject, validateConfig: validateConfig, setConfig: setConfig, applyConfig: applyConfig, generateUUID: generateUUID, generateRandomBytes: generateRandomBytes, whenTrue:whenTrue, makeCopy: makeCopy,combineObjects : combineObjects };
   
 })();
+
 
 
 /** 
@@ -540,6 +544,7 @@ var logging = new util.Log(),
     
         
     
+
 /*
  * Copyright 2014 IBM Corp.
  *
@@ -1247,7 +1252,7 @@ EndpointConnection.prototype = util.RtcommBaseObject.extend (
         setUserID : function(id) {
           id = id || createGuestUserID();
           l('DEBUG') && console.log(this+'.setUserID id is '+id);
-          if (this.id === null) {
+          if (this.id === null || /^GUEST/.test(this.id)) {
             // Set the id to what was passed.
             this.id = this.userid = this.config.userid = id;
             return id;
@@ -1256,6 +1261,9 @@ EndpointConnection.prototype = util.RtcommBaseObject.extend (
             return id;
            }
         },
+        getUserID : function() {
+          return this.config.userid;
+        }, 
         getLwtMessage: function() {
           // should be an empty message
           this.private.willMessage =  this.private.willMessage || ''; 
@@ -1277,6 +1285,7 @@ EndpointConnection.prototype = util.RtcommBaseObject.extend (
     };
   })()
 );
+
 /*
  * Copyright 2014 IBM Corp.
  *
@@ -1524,6 +1533,7 @@ var MessageFactory = (function (){
     cast : cast
   };
 })();
+
 
 
 /*
@@ -1885,6 +1895,7 @@ MqttConnection.prototype  = util.RtcommBaseObject.extend((function() {
       }
     }; // end of Return
 })());
+
 
 /*
  * Copyright 2014 IBM Corp.
@@ -2293,6 +2304,7 @@ SigSession.prototype = util.RtcommBaseObject.extend((function() {
   };
 })());
 
+
 /*
  * Copyright 2014 IBM Corp.
  *
@@ -2444,168 +2456,11 @@ Transaction.prototype = util.RtcommBaseObject.extend(
 });
 
 
+
   return { EndpointConnection:EndpointConnection, MessageFactory:MessageFactory, MqttConnection:MqttConnection };
   
 })();
 
-
-var BaseSessionEndpoint = function BaseSessionEndpoint(protocols) {
-  // Presuming you creat an object based on this one, 
-  // you must override the session event handler and
-  // then augment newSession object.
-  this.config = {
-    protocols: protocols || null
-  };
-  this.dependencies = {
-    endpointConnection: null,
-  };
-  // Private info.
-  this._ = {
-    referralSession: null,
-    activeSession: null,
-    appContext: null,
-    available: true
-  };
-  protocols && Object.keys(protocols).forEach(function(key) {
-    this.config[key] = protocols[key];
-  });
-};
-/*globals util:false*/
-/*globals l:false*/
-BaseSessionEndpoint.prototype = util.RtcommBaseObject.extend((function() {
-  function createSignalingSession(remoteEndpointID, context) {
-    l('DEBUG') && console.log("createSignalingSession context: ", context);
-    var sessid = null;
-    var toTopic = null;
-    if (context._.referralSession) {
-      var details = context._.referralSession.referralDetails;
-      sessid =  (details && details.sessionID) ? details.sessionID : null;
-      remoteEndpointID =  (details && details.remoteEndpointID) ? details.remoteEndpointID : null;
-      toTopic =  (details && details.toTopic) ? details.toTopic : null;
-    }
-    if (!remoteEndpointID) {
-      throw new Error('toEndpointID must be set');
-    }
-    var session = context.dependencies.endpointConnection.createSession({
-      id : sessid,
-      toTopic : toTopic,
-      remoteEndpointID: remoteEndpointID,
-      appContext: context._.appContext
-    });
-    console.log('session: ', session);
-    return session;
-  }
-  // Protocol Specific handling of the session content. 
-  //
-  function addSessionCallbacks(context, session) {
-     // Define our callbacks for the session.
-    session.on('pranswer', function(content){
-      context._.processMessage(content);
-    });
-    session.on('message', function(content){
-      l('DEBUG') && console.log('SigSession callback called to process content: ', content);
-      context._.processMessage(content);
-    });
-    session.on('started', function(content){
-      // Our Session is started!
-      content && context._.processMessage(content);
-      if (context._.referralSession) {
-        context._.referralSession.respond(true);
-      }
-    });
-    session.on('stopped', function() {
-      console.log('Session Stopped');
-    });
-    session.on('starting', function() {
-      console.log('Session Started');
-    });
-    session.on('failed', function(message) {
-      console.log('Session FAILED');
-    });
-    l('DEBUG') && console.log('createSignalingSession created!', session);
-
-   // session.listEvents();
-    return true;
-  }
-
-return  {
-  getAppContext:function() {return this._.appContext;},
-  newSession: function(session) {
-      var event = null;
-      var msg = null;
-      // If there is a session.appContext, it must match unless this.ignoreAppContext is set 
-      if (this.ignoreAppContext || 
-         (session.appContext && (session.appContext === this.getAppContext())) || 
-         (typeof session.appContext === 'undefined' && session.type === 'refer')) {
-        // We match appContexts (or don't care)
-        if (this.available()){
-          // We are available (we can mark ourselves busy to not accept the call)
-          event = 'incoming';
-          if (session.type === 'refer') {
-            l('DEBUG') && console.log(this + '.newSession() REFER');
-            event = 'refer';
-          }
-         // Save the session and start it.
-         this._.activeSession = session;
-         session.start();
-         // Now, depending on the session.message (i.e its peerContent or future content) then do something. 
-         //  For an inbound session, we have several scenarios:
-         //
-         //  1. peerContent === webrtc 
-         //    -- we need to send a pranswer, create our webrtc endpoint, and 'answer'
-         //
-         //  2. peerContent === chat
-         //    -- it is chat content, emit it out, but respond and set up the session.
-         //
-         if (session.message && session.message.peerContent) {
-           // Emit this message, wait for something else?
-           session.pranswer();
-           console.log('Should send message now to someone else...');
-         } else {
-           session.respond();
-         }
-         //
-         //
-         // 
-         //    var conn = this.dependencies.webrtcConnection = this.createConnection();
-         //   conn.init({session:session});
-         this.available(false);
-         // this.emit(event, 'Something here...');
-        } else {
-          msg = 'Busy';
-          l('DEBUG') && console.log(this+'.newSession() '+msg);
-          session.fail('Busy');
-        }
-      } else {
-        msg = 'Client is unable to accept a mismatched appContext: ('+session.appContext+') <> ('+this.getAppContext()+')';
-        l('DEBUG') && console.log(this+'.newSession() '+msg);
-        session.fail(msg);
-      }
-  },
-    available: function(a) {
-      if (a) {
-        if (typeof a === 'boolean') { 
-          this._.available = a;
-          return a;
-        } 
-      } else  {
-        return this._.available;
-      }
-    },
-  connect: function(endpointid) {
-    this._.activeSession = createSignalingSession(endpointid, this);
-    this._.activeSession.start();
-  },
-  disconnect: function() {
-    this._.activeSession.stop();
-  },
-
-  reject: function() {
-
-  }
-};
-
-})());
 
 
 /*
@@ -2868,6 +2723,7 @@ var EndpointProvider =  function EndpointProvider() {
 
     endpointConnection.on('servicesupdate', function(services) {
       endpointProvider._.services = services;
+
       endpointProvider.updateQueues();
     });
 
@@ -2998,7 +2854,7 @@ var EndpointProvider =  function EndpointProvider() {
       objConfig.userid = this.config.userid;
       l('DEBUG') && console.log(this+'.getRtcommEndpoint using config: ', objConfig);
       endpoint = new RtcommEndpoint(objConfig);
-      endpoint.setEndpointConnection(this.dependencies.endpointConnection);
+      this.dependencies.endpointConnection && endpoint.setEndpointConnection(this.dependencies.endpointConnection);
 //      endpoint.init(objConfig);
       endpoint.on('destroyed', function(event_object) {
         endpointProvider._.endpointRegistry.remove(event_object.endpoint);
@@ -3075,13 +2931,17 @@ var EndpointProvider =  function EndpointProvider() {
   /*
    * Set the userId -- generally used prior to init.
    * cannot overwrite an existing ID, but will propogate to endpoints.
+   *
+   * If we are anonymous, can update the userid
    */
   this.setUserID = function(userid) {
-    if (this.config.userid && (userid !== this.config.userid)) {
+    if (this.config.userid && (userid !== this.config.userid) && !(/^GUEST/.test(this.config.userid))) {
       throw new Error('Cannot change UserID once it is set');
     } else {
       this.config.userid = userid;
       this._.id = userid;
+      // update the endpoint connection
+      this.getEndpointConnection() && this.getEndpointConnection().setUserID(userid);
       // update the endpoints
       this._.endpointRegistry.list().forEach(function(endpoint){
         endpoint.setUserID(userid);
@@ -3227,6 +3087,7 @@ var EndpointProvider =  function EndpointProvider() {
 EndpointProvider.prototype = util.RtcommBaseObject.extend({});
 
 
+
 /*
  * This is a private EndpointRegistry object that 
  * can be used to manage endpoints.
@@ -3262,9 +3123,12 @@ var EndpointRegistry = function EndpointRegistry(options) {
   function getOneAvailable() {
     var a = [];
     this.list().forEach(function(item){
+      console.log('REMOVE ME: checking item: ', item);
+      console.log('REMOVE ME: available? '+ item.available());
       item.available() && a.push(item);
     });
     // Return the last one found
+    console.log('REMOVE ME: Found: ', a);
     if(a.length > 0 ) { 
       return a[a.length-1];
     } else {
@@ -3410,6 +3274,7 @@ var EndpointRegistry = function EndpointRegistry(options) {
   };
 
 };
+
 /*
  * Copyright 2014 IBM Corp.
  *
@@ -3498,6 +3363,7 @@ var logging = new util.Log(),
     
         
     
+
 var MqttEndpoint = function MqttEndpoint(config) {
 
   this.dependencies = { 
@@ -3540,6 +3406,7 @@ MqttEndpoint.prototype = util.RtcommBaseObject.extend({
              });
            }
 });
+
   var Queues = function Queues(availableQueues) {
     var Queue = function Queue(queue) {
       var self = this;
@@ -3600,6 +3467,7 @@ MqttEndpoint.prototype = util.RtcommBaseObject.extend({
   Queues.prototype.toString = function() {
     this.list();
   };
+
 /*
  * Copyright 2014 IBM Corp.
  *
@@ -3638,6 +3506,7 @@ var RtcommEndpoint = (function invocation(){
     var chat = this;
     this._ = {};
     this._.objName = 'Chat';
+    this.id = parent.id;
     this._.parentConnected = false;
     this._.enabled = false;
     this.onEnabledMessage = null;
@@ -3656,14 +3525,18 @@ var RtcommEndpoint = (function invocation(){
      * @param {string} message  Message to send when enabled.
      */  
     this.enable =  function(message) {
+      l('DEBUG') && console.log(this+'.enable() - current state --> '+ this.state);
+
       this.onEnabledMessage = message || createChatMessage(parent.userid + ' has initiated a Chat with you');
       // Don't need much, just set enabled to true.
       // Default message
       this._.enabled = true;
       
       if (parent.sessionStarted()) {
+        l('DEBUG') && console.log(this+'.enable() - Session Started, connecting chat');
         this._connect();
       } else { 
+        l('DEBUG') && console.log(this+'.enable() - Session not starting, may respond, but also connecting chat');
         parent._.activeSession && parent._.activeSession.respond();
         this._connect();
       }
@@ -3673,7 +3546,7 @@ var RtcommEndpoint = (function invocation(){
      * Accept an inbound connection  
      */
     this.accept = function(message) {
-      l('DEBUG') && console.log(this+'.accept() -- accepting --'+ this.state);
+      l('DEBUG') && console.log(this+'.accept() -- accepting -- '+ this.state);
       if (this.state === 'alerting') {
         this.enable(message || 'Accepting chat connection');
       }
@@ -3733,12 +3606,15 @@ var RtcommEndpoint = (function invocation(){
       return this;
     };
     this._setState = function(state, object) {
+     l('DEBUG') && console.log(this+'._setState() setting state to: '+ state); 
+      var currentState = this.state;
       try {
-        this.emit(state, object);
         this.state = state;
+        this.emit(state, object);
       } catch(error) {
         console.error(error);
         console.error(this+'._setState() unsupported state: '+state );
+        this.state = currentState;
       }
     };
 
@@ -4208,6 +4084,7 @@ return  {
 
   /* used by the parent to assign the endpoint connection */
   setEndpointConnection: function(connection) {
+    this.webrtc && this.webrtc.setIceServers(connection.RTCOMM_CONNECTOR_SERVICE);
     this.dependencies.endpointConnection = connection;
   },
 
@@ -4300,6 +4177,7 @@ return  {
 
 return RtcommEndpoint;
 })();
+
  /*
  * Copyright 2014 IBM Corp.
  *
@@ -4334,9 +4212,10 @@ var WebRTCConnection = (function invocation() {
     };
 
     this.config = {
-      RTCConfiguration : null,
+      RTCConfiguration : {iceTransports : "all"},
       RTCOfferConstraints: null,
       RTCConstraints : {'optional': [{'DtlsSrtpKeyAgreement': 'true'}]},
+      iceServers: [],
       mediaIn: null,
       mediaOut: null,
       broadcast: {
@@ -4405,7 +4284,9 @@ var WebRTCConnection = (function invocation() {
       var self = this;
       var parent = self.dependencies.parent;
       l('DEBUG') && console.log(self+'.enable()  --- entry ---');
+
       var RTCConfiguration = (config && config.RTCConfiguration) ?  config.RTCConfiguration : this.config.RTCConfiguration;
+      RTCConfiguration.iceServers = RTCConfiguration.iceServers || this.getIceServers();
       var RTCConstraints= (config && config.RTCConstraints) ? config.RTCConstraints : this.config.RTCConstraints;
       this.config.RTCOfferConstraints= (config && config.RTCOfferConstraints) ? config.RTCOfferConstraints: this.config.RTCOfferConstraints;
 
@@ -4944,7 +4825,58 @@ var WebRTCConnection = (function invocation() {
     } else {
       l('DEBUG') && console.debug(self+'.enableLocalAV() - nothing to do; both audio & video are false');
     }
-  }
+  },
+
+ setIceServers: function(service) {
+   function buildTURNobject(url) {
+     // We expect this to be in form 
+     // turn:<userid>@servername:port:credential:<password>
+     var matches = /^turn:(\S+)\@(\S+\:\d+):credential:(.+$)/.exec(url);
+     var user = matches[1] || null;
+     var server = matches[2] || null;
+     var credential = matches[3] || null;
+
+     var iceServer = {
+       'url': null,
+       'username': null,
+       'credential': null
+     }
+     if (user && server && credential) {
+       iceServer.url = 'turn:'+server;
+       iceServer.username= user;
+       iceServer.credential= credential;
+     } else {
+       l('DEBUG') && console.log('Unable to parse the url into a Turn Server');
+       iceServer = null;
+     }
+     return iceServer;
+   }
+
+    // Returned object expected to look something like:
+    // {"iceServers":[{"url": "stun:host:port"}, {"url","turn:host:port"}] 
+    var urls = [];
+    if (service && service.iceURL)  {
+        service.iceURL.split(',').forEach(function(url){
+          // remove leading/trailing spaces
+          url = url.trim();
+          var obj = null;
+          if (/^stun:/.test(url)) {
+            l('DEBUG') && console.debug(this+'.setIceServers() Is STUN: '+url)
+            obj = {'url': url};
+          } else if (/^turn:/.test(url)) {
+            l('DEBUG') && console.debug(this+'.setIceServers() Is TURN: '+url)
+            obj = buildTURNobject(url);
+          } else {
+            l('DEBUG') && console.error('Failed to match anything, bad Ice URL: '+url)
+          }
+          obj && urls.push(obj);
+        });
+    } 
+    this.config.iceServers = urls;
+   },
+  getIceServers: function() {
+    return this.config.iceServers;
+    }
  };
 
 })()); // End of Prototype
@@ -5199,29 +5131,10 @@ var getUserMedia, attachMediaStream,detachMediaStream;
   detachMediaStream = skip;
 }
 
-  var getIceServers = function(object) {
-    // Expect object to look something like:
-    // {"iceservers":{"urls": "stun:host:port", "urls","turn:host:port"} }
-    var iceServers = [];
-    var services = null;
-    var servers = null;
-    if (object && object.services && object.services.iceservers) {
-      servers  = object.services.iceservers;
-      if (servers && servers.iceURL) {
-        var urls = [];
-        servers.iceURL.split(',').forEach(function(url){
-          urls.push({'url': url});
-        });
-        iceServers = {'iceServers':urls};
-        return iceServers;
-      }
-    } else {
-      return  {'iceServers':[]};
-    }
-  };
 return WebRTCConnection;
 
 })()
+
 
 
 

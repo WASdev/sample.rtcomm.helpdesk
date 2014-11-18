@@ -1,7 +1,7 @@
 /**
  * Definition for the 
  */
-var rtcommModule = angular.module('rtcommModule', ['angularModalService']);
+var rtcommModule = angular.module('rtcommModule', ['angularModalService','ui.bootstrap','treeControl']);
 
 /**
  * Set debugEnaled to true to enable the debug messages in this rtcomm angule module.
@@ -343,7 +343,11 @@ rtcommModule.factory('RtcommService', function ($rootScope, RtcommConfig, $log) 
 					return (session.sessionStarted);
 				else
 					return(false);
-			}
+			},
 			
+			setAlias : function(aliasID) {
+				if ((typeof aliasID !== "undefined") && aliasID != '')
+					myEndpointProvider.setUserID(aliasID); 
+			}
 	  };
 });
