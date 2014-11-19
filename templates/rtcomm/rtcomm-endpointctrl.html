@@ -1,11 +1,17 @@
 <div class="endpoint-controls">
-	<div class="btn-group pull-left" style='padding: 10px' ng-model="epCtrlConnected">
-		<button id="btnDisconnectEndpoint" class='btn  btn-primary' ng-click="disconnect()" ng-disabled=!epCtrlConnected>Disconnect</button>
-		<button id="btnEnableAV" class='btn  btn-primary' ng-click="toggleAV()" focusInput=true ng-disabled=!epCtrlConnected>
-			<span>{{epCtrlAVConnected ? 'Disable A/V' : 'Enable A/V'}}</span>
+	<div class="btn-group pull-left" style='padding: 10px'>
+		<button id="btnDisconnectEndpoint" class='btn  btn-primary' ng-click="disconnect()" ng-disabled="(sessionState != CONNECTED)">
+			<span class="glyphicon glyphicon glyphicon-resize-full" aria-hidden="true" aria-label="Disconnect"></span>
+			Disconnect
+		</button>
+		<button id="btnEnableAV" class='btn  btn-primary' ng-click="toggleAV()" focusInput=true ng-disabled="(sessionState != CONNECTED)">
+			<span class="glyphicon glyphicon-facetime-video" aria-hidden="true" aria-label="Enable A/V"></span>
+			{{epCtrlAVConnected ? 'Disable A/V' : 'Enable A/V'}}
 		</button>
 	</div>
-	<p class="endpoint-controls-title navbar-text pull-right ">
-			<span>{{epCtrlConnected ? 'Connected to ' + epCtrlRemoteEndpointID : 'Disconnected'}}</span>
+
+	<p class="endpoint-controls-title navbar-text pull-right" ng-switch on="sessionState">
+		<span ng-switch-when="connected">Connected to {{epCtrlRemoteEndpointID}}</span>
+		<span ng-switch-when="disconnected">Disconnected</span>
 	</p>
 </div>

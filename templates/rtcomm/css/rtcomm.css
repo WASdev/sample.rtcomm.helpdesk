@@ -1,6 +1,7 @@
 #endpointContainer {
   background-color: #ccc;
-  border: 1px solid black;
+  border: 1px solid #428bca;
+  border-radius: 4px;
 }
 
 /* Video window related css */
@@ -37,6 +38,44 @@
 }
 
 /* Chat related css */
+.presence
+{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.presence li
+{
+    margin-bottom: 10px;
+    /*padding-bottom: 5px;*/
+    /*border-bottom: 1px dotted #B3A9A9;*/
+}
+
+.presence li .presence-body p
+{
+    margin: 0;
+    color: #777777;
+}
+
+.panel-presence
+{
+    margin: 0;
+    height: 100%;
+    border: 1px solid #428bca;
+    border-radius: 4px;
+}
+
+.panel-presence-body
+{
+	overflow-y: scroll;
+	height: 350px;
+    background-color: white;
+    margin: 1;
+	border-radius: 4px;
+}
+
+/* Chat related css */
 .chat
 {
     list-style: none;
@@ -57,9 +96,11 @@
     color: #777777;
 }
 
-.panel .slidedown .glyphicon, .chat .glyphicon
+/*.slidedown .glyphicon, .chat .glyphicon*/
+
+.panel 
 {
-    margin-right: 5px;
+    /*margin-right: 1px;*/
     height: 100%;
 }
 
@@ -101,6 +142,11 @@
     z-index: 5;
     background: #333;
     color: white;
+	border-radius: 4px;
+}
+
+.endpoint-controls .glyphicon{
+    margin-right: 1px;
 }
 
 .session-manager-title  {
@@ -116,7 +162,7 @@
 }
 
 .session-manager-title  {
-    font-size:x-large;
+    font-size: large;
 }
 
 .session-mgr-container{
@@ -147,4 +193,3 @@
 	top: 0;
 	bottom: 0;
 }
-

@@ -11,14 +11,18 @@
     <title>Customer Home Page</title>
 
 	<!-- Bootstrap core CSS -->
-	<link href="js/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-	<link href="js/libs/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+	<link href="bower_components/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+	<link href="bower_components/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
 	<link href="templates/rtcomm/css/rtcomm.css" rel="stylesheet">
 
-	<script	src="js/libs/jquery/jquery-1.11.1.min.js"></script>
-	<script	src="js/libs/bootstrap/js/bootstrap.min.js"></script>
-	<script	src="js/libs/angular/angular.min.js"></script>
-	<script	src="js/libs/angular/angular-modal-service.min.js"></script>
+	<script	src="bower_components/jquery/jquery.min.js"></script>
+	<script	src="bower_components/bootstrap/js/bootstrap.min.js"></script>
+	<script	src="bower_components/angular/angular.min.js"></script>
+	<script	src="bower_components/angular-modal-service/angular-modal-service.min.js"></script>
+	<script	src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
+	
+	<script type="text/javascript" src="bower_components/angular-tree-control/angular-tree-control.js"></script>
+	<link rel="stylesheet" type="text/css" href="bower_components/angular-tree-control/css/tree-control-attribute.css">
 	
 	<script src="js/libs/rtcomm/rtcomm.js"></script>
 	<script	src="js/libs/rtcomm/rtcomm-services.js"></script>
@@ -62,14 +66,19 @@
 	       	</li>
           </ul>
 	      <li>
+	        <!-- Use this button if you wish to initiate a call to a static endpoint such as a queue-->
 	      	<button id="btn-helpdesk" class='pull-right btn btn-default navbar-btn' ng-click="onDisplayCallModal()" ng-disabled=!enableCallModel>Helpdesk</button>
 	      </li>
         </div>
       </div>
       
-      
-	 <rtcomm-call-modal ng-init="init('Appliances')"></rtcomm-call-modal>
-     </div>
+      <!-- This initializes the call modal. There are two parameters. -->
+      <!-- The first defines that static endpoint to be called from the call modal. -->
+      <!-- The second boolean specifies whether to call without a userID (false) or prompt for a userID (true).  -->
+      <!-- Note that if you wish to prompt for a user ID, the configured userid passed to the RtcommConfigController -->
+      <!-- must be an empty string (''), to call without a userID don't define a userid in the config.  -->
+	  <rtcomm-call-modal ng-init="init('Appliances')"></rtcomm-call-modal>
+    </div>
 
     <div ng-controller="RtcommConfigController" ng-init="init('customerConfig.json')"></div>
     <rtcomm-alert  ng-init="init(true)"></rtcomm-alert>
