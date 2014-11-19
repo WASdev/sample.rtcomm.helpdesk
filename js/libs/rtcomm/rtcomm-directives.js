@@ -167,24 +167,37 @@ rtcommModule.directive('rtcommQueues', ['RtcommService', '$log', function(Rtcomm
 		templateUrl : 'templates/rtcomm/rtcomm-queues.html',
 		controller : function($scope) {
 			$scope.rQueues = [];
+			$scope.autoJoinQueues = false;
+			
+			$scope.init = function(autoJoinQueues) {
+				$log.debug('rtcommQueues: autoJoinQueues = ' + autoJoinQueues);
+				$scope.autoJoinQueues = autoJoinQueues;
+    	  	};
 
 			$scope.$on('queueupdate', function(event, queues) {
-				$log.debug('scope queues', $scope.rQueues);
+				$log.debug('rtcommQueues: scope queues', $scope.rQueues);
 				Object.keys(queues).forEach(function(key) {
+					$log.debug('rtcommQueues: Push queue: ' + queues[key]);
+					$log.debug('rtcommQueues: autoJoinQueues: ' + $scope.autoJoinQueues);
 					$scope.rQueues.push(queues[key]);
+					
+					// If autoJoin we go ahead and join the queue as soon as we get the queue update.
+					if ($scope.autoJoinQueues == true){
+						$scope.onQueueClick(queues[key]);
+					}
 				});
-				$log.debug('queues', queues);
 			});
 			
 	        $scope.$on('rtcomm::init', function (event, success, details) {
-
 				if (success == false){
+					$log.debug('rtcommQueues: init: clear queues');
 					$scope.rQueues = [];
 				}
 	        });
 
 			$scope.onQueueClick = function(queue){
 				var index;
+				$log.debug('rtcommQueues: onClick: TOP');
 				for	(index = 0; index < $scope.rQueues.length; index++) {
 				    if($scope.rQueues[index].endpointID === queue.endpointID)
 				    {
@@ -199,6 +212,10 @@ rtcommModule.directive('rtcommQueues', ['RtcommService', '$log', function(Rtcomm
 							$scope.rQueues[index].active = false;
 						}
 				    }
+				    else if (index == ($scope.rQueues.length - 1)){
+						$log.debug('rtcommQueues: ERROR: queue.endpointID: ' + queue.endpointID + ' not found in list of queues');
+				    	
+				    }
 				}
 			};
 		},
@@ -206,6 +223,138 @@ rtcommModule.directive('rtcommQueues', ['RtcommService', '$log', function(Rtcomm
 	};
 }]);
 
+/**
+ * This directive manages the chat portion of a session. The data model for chat
+ * is maintained in the RtcommService. This directive handles switching between
+ * active endpoints.
+ */
+
+rtcommModule.directive("rtcommPresence", ['RtcommService', '$log', function(RtcommService, $log) {
+    return {
+      restrict: 'E',
+      templateUrl: "templates/rtcomm/rtcomm-presence.html",
+      controller: function ($scope, $rootScope) {
+    	  
+    	  $scope.onCallClick = function(calleeEndpointID){
+			  var endpoint = RtcommService.getEndpoint();
+			  $rootScope.$broadcast('endpointActivated', endpoint.id);
+			  endpoint.chat.enable();
+			  endpoint.connect(calleeEndpointID);
+    	  };
+    	  
+    	  $scope.treeOptions = {
+			    nodeChildren: "nodes",
+			    dirSelectable: true,
+			    injectClasses: {
+			        ul: "a1",
+			        li: "a2",
+			        liSelected: "a7",
+			        iExpanded: "a3",
+			        iCollapsed: "a4",
+			        iLeaf: "a5",
+			        label: "a6",
+			        labelSelected: "a8"
+			    }
+    	  };   	  
+
+       	  $scope.presenceData = [
+ 	                	{
+	                		"name" : "us",
+	                		"record" : false,
+	                		"nodes" : [
+    	                	{
+    	                		"name" : "agents",
+    	                		"record" : false,
+    	                		"nodes" : [
+    	                			{
+    	                				"name" : "Brian Pulito",
+    	    	                		"record" : true,
+    	                	      		"nodes" : [
+	                      			                {
+	                      			                	"name" : "queue",
+	                      			                	"value" : "appliances",
+                      			                		"record" : false
+	                      			                },
+	                      			                {
+	                      			                	"name" : "queue",
+	                      			                	"value" : "electronics",
+                      			                		"record" : false
+	                      			                },
+	                      			                {
+	                      			                	"name" : "sessions",
+	                      			                	"value" : "3",
+                      			                		"record" : false
+	                      			                }
+	                      			       ]
+	                			},
+	                			{
+	                				"name" : "Scott Graham",
+	    	                		"record" : true,
+	                      			"nodes" : [
+	                      			                {
+	                      			                	"name" : "queue",
+	                      			                	"value" : "appliances",
+                      			                		"record" : false
+	                      			                },
+	                      			                {
+	                      			                	"name" : "queue",
+	                      			                	"value" : "electronics",
+                      			                		"record" : false
+	                      			                },
+	                      			                {
+	                      			                	"name" : "sessions",
+	                      			                	"value" : "3",
+                      			                		"record" : false
+	                      			                }
+	                      			       ]
+   	                				}
+    	                		]
+    	                	},
+    	                	{
+    	                		"name" : "customers",
+    	                		"nodes" : [
+    	                			{
+    	                				"name" : "Jim Lawwill",
+    	    	                		"record" : true,
+    	                	      		"nodes" : [
+	                      			                {
+	                      			                	"name" : "page",
+	                      			                	"value" : "url",
+                    	    	                		"record" : false
+	                      			                },
+	                      			                {
+	                      			                	"name" : "vip",
+	                      			                	"value" : "true",
+	                    	    	                	"record" : false
+	                      			                }
+    	                      			       ]
+    	                			},
+    	                			{
+    	                				"name" : "Tibor Beres",
+    	    	                		"record" : true,
+    	                	      		"nodes" : [
+	                      			                {
+	                      			                	"name" : "page",
+	                      			                	"value" : "url",
+	                    	    	                	"record" : false
+	                      			                },
+	                      			                {
+	                      			                	"name" : "vip",
+	                      			                	"value" : "true",
+	                    	    	                	"record" : false
+	                      			                }
+	                      			            ]
+    	                			}
+    	                		]
+    	                	}
+    	               ]
+ 	           }
+ 	       ];
+
+      },
+	  controllerAs: 'presence'
+    };
+}]);
 
 /********************** Endpoint Directives *******************************/
 
@@ -235,8 +384,19 @@ rtcommModule.directive('rtcommEndpoint', ['RtcommService', '$log', function(Rtco
 				$scope.displayEndpoint = true;
 	        });
 
+			$scope.$on('session:failed', function (event, eventObject) {
+				if ($scope.epActiveEndpointUUID == eventObject.endpoint.id){
+					$scope.displayEndpoint = false;
+				}
+	        });
+
+			$scope.$on('session:rejected', function (event, eventObject) {
+				if ($scope.epActiveEndpointUUID == eventObject.endpoint.id){
+					$scope.displayEndpoint = false;
+				}
+	        });
+
 			$scope.$on('session:stopped', function (event, eventObject) {
-			    $log.debug('endointActivated received: endpointID = ' + eventObject.endpoint.id);
 				if ($scope.epActiveEndpointUUID == eventObject.endpoint.id){
 					$scope.displayEndpoint = false;
 				}
@@ -257,9 +417,13 @@ rtcommModule.directive('rtcommEndpointctrl', ['RtcommService', '$log', function(
         templateUrl: 'templates/rtcomm/rtcomm-endpointctrl.html',
         controller: function ($scope) {
         	
+        	//	Session states.
+        	$scope.DISCONNECTED = "disconnected";
+        	$scope.CONNECTED = "connected";
+
         	$scope.epCtrlActiveEndpointUUID = null;
         	$scope.epCtrlAVConnected = false;
-        	$scope.epCtrlConnected = false;
+        	$scope.sessionState = $scope.DISCONNECTED;
         	$scope.epCtrlRemoteEndpointID = null;
 
 			$scope.disconnect = function() {
@@ -286,7 +450,7 @@ rtcommModule.directive('rtcommEndpointctrl', ['RtcommService', '$log', function(
 			$scope.$on('session:started', function (event, eventObject) {
 			    $log.debug('endointActivated received: endpointID = ' + eventObject.endpoint.id);
 				if ($scope.epCtrlActiveEndpointUUID == eventObject.endpoint.id){
-					$scope.epCtrlConnected = true;
+					$scope.sessionState = $scope.CONNECTED;
 		        	$scope.epCtrlRemoteEndpointID = eventObject.endpoint.getRemoteEndpointID();
 				}
 	        });
@@ -294,7 +458,7 @@ rtcommModule.directive('rtcommEndpointctrl', ['RtcommService', '$log', function(
 			$scope.$on('session:stopped', function (event, eventObject) {
 			    $log.debug('endointActivated received: endpointID = ' + eventObject.endpoint.id);
 				if ($scope.epCtrlActiveEndpointUUID == eventObject.endpoint.id){
-					$scope.epCtrlConnected = false;
+					$scope.sessionState = $scope.DISCONNECTED;
 				}
 	        });
 
@@ -312,14 +476,17 @@ rtcommModule.directive('rtcommEndpointctrl', ['RtcommService', '$log', function(
 	       	$scope.$on('endpointActivated', function (event, endpointUUID) {
 				$scope.epCtrlActiveEndpointUUID = endpointUUID;
 				$scope.epCtrlAVConnected = RtcommService.isWebrtcConnected(endpointUUID);
-				$scope.epCtrlConnected = RtcommService.isSessionStarted(endpointUUID);
 				$scope.epCtrlRemoteEndpointID = RtcommService.getEndpoint(endpointUUID).getRemoteEndpointID();
+
+				if (RtcommService.isSessionStarted(endpointUUID) == true)
+					$scope.sessionState = $scope.CONNECTED;
 	       	});
 	       	
 	       	$scope.$on('noEndpointActivated', function (event) {
 				$scope.epCtrlAVConnected = false; 
-				$scope.epCtrlConnected = false;
 				$scope.epCtrlRemoteEndpointID = null;
+
+				$scope.sessionState = $scope.DISCONNECTED;
 	       	});
 	       	
         },
@@ -372,23 +539,22 @@ rtcommModule.directive("rtcommChat", ['RtcommService', '$log', function(RtcommSe
 		  $scope.chatActiveEndpointUUID = null;
 		  
 		  $scope.$on('endpointActivated', function (event, endpointUUID) {
-                $log.debug('rtcommChat: endpointActivated =' + endpointUUID);
+			  $log.debug('rtcommChat: endpointActivated =' + endpointUUID);
                 
-                //	The data model for the chat is maintained in the RtcommService.
-				$scope.chats = RtcommService.getChats(endpointUUID);
-				$scope.chatActiveEndpointUUID = endpointUUID;
-	        });
+			  //	The data model for the chat is maintained in the RtcommService.
+			  $scope.chats = RtcommService.getChats(endpointUUID);
+			  $scope.chatActiveEndpointUUID = endpointUUID;
+	      });
 		  
-	       	$scope.$on('noEndpointActivated', function (event) {
-	       		$scope.chats = [];
-	       		$scope.chatActiveEndpointUUID = null;
-	       	});
+	      $scope.$on('noEndpointActivated', function (event) {
+	    	  $scope.chats = [];
+	    	  $scope.chatActiveEndpointUUID = null;
+	      });
 	       	
-	        $scope.keySendMessage = function(keyEvent){
-	        	if (keyEvent.which === 13)
-	        		$scope.sendMessage();
-	        };
-
+	      $scope.keySendMessage = function(keyEvent){
+	    	  if (keyEvent.which === 13)
+	    		  $scope.sendMessage();
+	      };
 
 		  $scope.sendMessage = function() {
 	  		  var chat = {
@@ -493,6 +659,7 @@ rtcommModule.controller('RtcommCallModalController', ['$scope', '$log', function
 
     $scope.displayCallModal = false;
     $scope.enableCallModel = false;
+    $scope.name = null;
 
     $scope.onDisplayCallModal = function () {
 		$log.debug('RtcommCallModalController: onDisplayCallModal');
@@ -514,6 +681,18 @@ rtcommModule.controller('RtcommCallModalController', ['$scope', '$log', function
 	$scope.$on('session:stopped', function (event, eventObject) {
 	    $scope.enableCallModel = true;
     });
+}]);
+
+/**
+ * This controller takes care of collecting the result and alias for the call modal.
+ */
+rtcommModule.controller('CallModalResultController', ['$scope', 'close', '$log', function($scope, close, $log){
+
+    $scope.name = null;
+	
+	$scope.close = function(result) {
+	 	close({name: $scope.name, result: result}, 500); // close, but give 500ms for bootstrap to animate
+	 };
 
 }]);
 
@@ -525,6 +704,7 @@ rtcommModule.directive('rtcommCallModal', ['RtcommService', 'ModalService', '$lo
       restrict: 'E',
       controller: function($scope, $rootScope, RtcommService, ModalService) {
 		    $scope.calleeID = null;
+		    $scope.callerID = null;
 
 		    $scope.init = function(calleeID) {
 			    $scope.calleeID = calleeID;
@@ -533,16 +713,23 @@ rtcommModule.directive('rtcommCallModal', ['RtcommService', 'ModalService', '$lo
 		    $scope.showCallModal = function() {
 				ModalService.showModal({
 		    		      templateUrl: "templates/rtcomm/rtcomm-modal-call.html",
-		    		      controller: "ModalController"
+		    		      controller: "CallModalResultController"
 		    		    }).then(function(modal) {
 		    		      modal.element.modal();
 		    		      modal.close.then(function(result) {
-		   		            if (result === true) {
-			   		            $log.debug('Calling calleeID: ' + $scope.calleeID);
+		   		            if (result.result === true) {
+			   		            $log.debug('rtcommCallModal: Calling calleeID: ' + $scope.calleeID);
+			   		            $log.debug('rtcommCallModal: CallerID: ' + result.name);
+			   		            
+			   		            //	This is used to set an alias when the endoint is not defined.
+			   		            if ($scope.callerID == null && (typeof result.name !== "undefined") && result.name != ''){
+			   		            	$scope.callerID = result.name;
+				   		            RtcommService.setAlias(result.name);
+			   		            }
 
 			   		            var endpoint = RtcommService.getEndpoint();
 			   		            $rootScope.$broadcast('endpointActivated', endpoint.id);
-			   		            endpoint.chat.enable(); // Fix: probably should enable this is a more generic way.
+			   		            endpoint.chat.enable();
 		   		            	endpoint.connect($scope.calleeID);
 		   		            }
 	   		            	$scope.displayCallModal = false;

@@ -1,13 +1,13 @@
 /**
  * Definition for the 
  */
-var rtcommModule = angular.module('rtcommModule', ['angularModalService']);
+var rtcommModule = angular.module('rtcommModule', ['angularModalService','ui.bootstrap','treeControl']);
 
 /**
  * Set debugEnaled to true to enable the debug messages in this rtcomm angule module.
  */
 rtcommModule.config(function($logProvider){
-	  $logProvider.debugEnabled(false);
+	  $logProvider.debugEnabled(true);
 	});
 
 /**
@@ -71,8 +71,8 @@ rtcommModule.factory('RtcommService', function ($rootScope, RtcommConfig, $log) 
 	  var queueList = null;
 	  var sessions = [];
 	  
-	  /*
 	  myEndpointProvider.setLogLevel('DEBUG');
+	  /*
 	  myEndpointProvider.setLogLevel('MESSAGE');
 	  */
 
@@ -343,7 +343,11 @@ rtcommModule.factory('RtcommService', function ($rootScope, RtcommConfig, $log) 
 					return (session.sessionStarted);
 				else
 					return(false);
-			}
+			},
 			
+			setAlias : function(aliasID) {
+				if ((typeof aliasID !== "undefined") && aliasID != '')
+					myEndpointProvider.setUserID(aliasID); 
+			}
 	  };
 });
