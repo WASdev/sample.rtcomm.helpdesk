@@ -21,7 +21,8 @@ rtcommModule.factory('RtcommConfig', function rtcommConfigFactory(){
 	    	rtcommTopicPath : "/rtcomm/",
 		    createEndpoint : false,
             appContext: 'rtcommHelpdesk',
-            userid: ''
+            userid: "",
+            presence : {topic : ""}
 		  };
 
 	  var endpointConfig = {
@@ -39,8 +40,9 @@ rtcommModule.factory('RtcommConfig', function rtcommConfigFactory(){
 			providerConfig.rtcommTopicPath = (typeof config.rtcommTopicPath !== "undefined")? config.rtcommTopicPath : providerConfig.rtcommTopicPath;
 			providerConfig.createEndpoint = (typeof config.createEndpoint !== "undefined")? config.createEndpoint : providerConfig.createEndpoint;
 			providerConfig.appContext = (typeof config.appContext !== "undefined")? config.appContext : providerConfig.appContext;
+			providerConfig.presence.topic = (typeof config.presenceTopic !== "undefined")? config.presenceTopic : providerConfig.presence.topic;
 
-			//	Protocol enablement booleans
+			//	Protocol related booleans
 			endpointConfig.chat= (typeof config.chat!== "undefined")? config.chat: endpointConfig.chat;
 			endpointConfig.webrtc = (typeof config.webrtc!== "undefined")? config.webrtc: endpointConfig.webrtc;
 			
@@ -260,10 +262,16 @@ rtcommModule.factory('RtcommService', function ($rootScope, RtcommConfig, $log) 
 				}
 			},
 
-      // Changes for presenceMonitor
-      getPresenceMonitor:function(topic) {
-       return myEndpointProvider.getPresenceMonitor(topic);
-      },
+	      // Changes for presenceMonitor
+	      getPresenceMonitor:function(topic) {
+	    	  return myEndpointProvider.getPresenceMonitor(topic);
+	      },
+	      
+	      // Changes for presenceMonitor
+	      publishPresence:function() {
+	    	  return myEndpointProvider.publishPresence();
+	      },
+
 
 			getEndpoint : function(uuid) {
 			  var endpoint = null;

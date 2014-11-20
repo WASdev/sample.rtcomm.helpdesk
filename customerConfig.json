@@ -3,5 +3,6 @@
 	"port" : 1883,
 	"rtcommTopicPath" : "/rtcomm-helpdesk-demo/",
 	"broadcastAudio" : true,
-	"broadcastVideo" : true
+	"broadcastVideo" : true,
+	"presenceTopic" : "customers"
 }

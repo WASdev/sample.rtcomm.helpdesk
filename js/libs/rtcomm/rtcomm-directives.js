@@ -196,9 +196,8 @@ rtcommModule.directive('rtcommQueues', ['RtcommService', '$log', function(Rtcomm
 	        });
 
 			$scope.onQueueClick = function(queue){
-				var index;
 				$log.debug('rtcommQueues: onClick: TOP');
-				for	(index = 0; index < $scope.rQueues.length; index++) {
+				for	(var index = 0; index < $scope.rQueues.length; index++) {
 				    if($scope.rQueues[index].endpointID === queue.endpointID)
 				    {
 						$log.debug('rtcommQueues: onClick: queue.endpointID = ' + queue.endpointID);
@@ -235,32 +234,47 @@ rtcommModule.directive("rtcommPresence", ['RtcommService', '$log', function(Rtco
       templateUrl: "templates/rtcomm/rtcomm-presence.html",
       controller: function ($scope, $rootScope) {
     	  
+    	  $scope.monitorTopics = [];
+    	  $scope.presenceData = [];
+    	  
+    	  $scope.treeOptions = {
+  			    nodeChildren: "nodes",
+  			    dirSelectable: true,
+  			    injectClasses: {
+  			        ul: "a1",
+  			        li: "a2",
+  			        liSelected: "a7",
+  			        iExpanded: "a3",
+  			        iCollapsed: "a4",
+  			        iLeaf: "a5",
+  			        label: "a6",
+  			        labelSelected: "a8"
+  			    }
+      	  };   	  
+
     	  $scope.onCallClick = function(calleeEndpointID){
 			  var endpoint = RtcommService.getEndpoint();
 			  $rootScope.$broadcast('endpointActivated', endpoint.id);
 			  endpoint.chat.enable();
 			  endpoint.connect(calleeEndpointID);
     	  };
-        var presenceMonitor = RtcommService.getPresenceMonitor();
-    	  $scope.treeOptions = {
-			    nodeChildren: "nodes",
-			    dirSelectable: true,
-			    injectClasses: {
-			        ul: "a1",
-			        li: "a2",
-			        liSelected: "a7",
-			        iExpanded: "a3",
-			        iCollapsed: "a4",
-			        iLeaf: "a5",
-			        label: "a6",
-			        labelSelected: "a8"
-			    }
-    	  };   	  
+    	  
+	      $scope.$on('rtcomm::init', function (event, success, details) {
+	    	  RtcommService.publishPresence();
+	    	  var presenceMonitor = RtcommService.getPresenceMonitor();
+	    	  
+	    	  presenceMonitor.on('updated', function(){
+	              $scope.$apply();
+	          });
+	    	  
+		      $scope.presenceData = presenceMonitor.getPresenceData();
+		      for (var index = 0; index < $scope.monitorTopics.length; index++) {
+		    	  $log.debug('rtcommPresence: monitorTopic: ' + $scope.monitorTopics[index]);
+		    	  presenceMonitor.add($scope.monitorTopics[index]);
+		      }
+	      });
 
-        $scope.presenceData = presenceMonitor.getPresenceData();
-
-        /*
-
+	      /*
        	  $scope.presenceData = [
  	                	{
 	                		"name" : "us",
@@ -354,7 +368,7 @@ rtcommModule.directive("rtcommPresence", ['RtcommService', '$log', function(Rtco
     	               ]
  	           }
  	       ];
-         */
+ 	       */
 
       },
 	  controllerAs: 'presence'
