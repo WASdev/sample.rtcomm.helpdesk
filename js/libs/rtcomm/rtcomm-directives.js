@@ -241,7 +241,7 @@ rtcommModule.directive("rtcommPresence", ['RtcommService', '$log', function(Rtco
 			  endpoint.chat.enable();
 			  endpoint.connect(calleeEndpointID);
     	  };
-    	  
+        var presenceMonitor = RtcommService.getPresenceMonitor();
     	  $scope.treeOptions = {
 			    nodeChildren: "nodes",
 			    dirSelectable: true,
@@ -256,6 +256,10 @@ rtcommModule.directive("rtcommPresence", ['RtcommService', '$log', function(Rtco
 			        labelSelected: "a8"
 			    }
     	  };   	  
+
+        $scope.presenceData = presenceMonitor.getPresenceData();
+
+        /*
 
        	  $scope.presenceData = [
  	                	{
@@ -350,6 +354,7 @@ rtcommModule.directive("rtcommPresence", ['RtcommService', '$log', function(Rtco
     	               ]
  	           }
  	       ];
+         */
 
       },
 	  controllerAs: 'presence'

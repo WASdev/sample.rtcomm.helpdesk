@@ -260,6 +260,11 @@ rtcommModule.factory('RtcommService', function ($rootScope, RtcommConfig, $log) 
 				}
 			},
 
+      // Changes for presenceMonitor
+      getPresenceMonitor:function(topic) {
+       return myEndpointProvider.getPresenceMonitor(topic);
+      },
+
 			getEndpoint : function(uuid) {
 			  var endpoint = null;
 
