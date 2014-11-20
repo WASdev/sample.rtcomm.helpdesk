@@ -72,6 +72,7 @@ rtcommModule.factory('RtcommService', function ($rootScope, RtcommConfig, $log) 
 	  var endpointProviderInitialized = false;
 	  var queueList = null;
 	  var sessions = [];
+	  var presenceRecord = null;
 	  
 	  myEndpointProvider.setLogLevel('DEBUG');
 	  /*
@@ -79,6 +80,13 @@ rtcommModule.factory('RtcommService', function ($rootScope, RtcommConfig, $log) 
 	  */
 
 	  myEndpointProvider.setAppContext(RtcommConfig.getProviderConfig().appContext);
+	  
+	  var getPresenceRecord = function(){
+		  if (presenceRecord == null)
+			  presenceRecord = {'state': 'available', userDefines: []};
+		  
+		  return (presenceRecord);
+	  };
 	  
 	   //	This defines all the media related configuration and is controlled through external config.
 	   var getMediaConfig = function() {
@@ -206,6 +214,12 @@ rtcommModule.factory('RtcommService', function ($rootScope, RtcommConfig, $log) 
 	  
 	  var initSuccess = function(event) {
 		$log.debug('<<------rtcomm-service------>> - Event: Provider init succeeded');
+		
+		if (presenceRecord != null){
+            $log.debug('RtcommService: initSuccess: updating presence record');
+			myEndpointProvider.publishPresence(presenceRecord);
+		}
+		
  		$rootScope.$evalAsync(
  				function () {
 					var broadcastEvent = {
@@ -262,18 +276,84 @@ rtcommModule.factory('RtcommService', function ($rootScope, RtcommConfig, $log) 
 				}
 			},
 
-	      // Changes for presenceMonitor
+	      // Presence related methods
 	      getPresenceMonitor:function(topic) {
 	    	  return myEndpointProvider.getPresenceMonitor(topic);
 	      },
 	      
-	      // Changes for presenceMonitor
 	      publishPresence:function() {
-	    	  return myEndpointProvider.publishPresence();
+	    	  if (endpointProviderInitialized == true)
+	    		  myEndpointProvider.publishPresence(getPresenceRecord());
 	      },
 
+	      /**
+	       * userDefines is an array of JSON objects that look like:
+	       * 
+	       * 	{
+	       * 		name : "some name",
+	       * 		value : "some value"
+	       *    }
+	       *    
+	       *    The only rule is that some name and some value have to both be strings.
+	       */
+	      addToPresenceRecord:function(userDefines) {
+	    	  
+	    	  // First remove this record if it already exist.
+	    	  for (var i = 0; i < userDefines.length; i++) {
+		    	  for (var j = 0; j < getPresenceRecord().userDefines.length; j++) {
+		    		  
+		    		  if (getPresenceRecord().userDefines[j].name == userDefines[i].name){
+			    		  getPresenceRecord().userDefines.splice(j,1);
+		    			  break;
+		    		  }
+		    	  }
+  			  }
+	    	  
+ 			  for (var index = 0; index < userDefines.length; index++) {
+ 				 getPresenceRecord().userDefines.push(userDefines[index]);
+ 			  }
 
-			getEndpoint : function(uuid) {
+	    	  if (endpointProviderInitialized == true){
+	              $log.debug('RtcommService: addToPresenceRecord: updating presence record to: ', getPresenceRecord());
+	    		  myEndpointProvider.publishPresence(getPresenceRecord());
+	    	  }
+	      },
+
+	      /**
+	       * userDefines is an array of JSON objects that look like:
+	       * 
+	       * 	{
+	       * 		name : "some name",
+	       * 		value : "some value"
+	       *    }
+	       *    
+	       *    The only rule is that some name and some value have to both be strings.
+	       */
+	      removeFromPresenceRecord:function(userDefines) {
+
+	    	  for (var i = 0; i < userDefines.length; i++) {
+		    	  for (var j = 0; j < getPresenceRecord().userDefines.length; j++) {
+		    		  
+		    		  if (getPresenceRecord().userDefines[j].name == userDefines[i].name){
+			    		  getPresenceRecord().userDefines.splice(j,1);
+		    			  break;
+		    		  }
+		    	  }
+  			  }
+	    	  
+	    	  if (endpointProviderInitialized == true){
+	              $log.debug('RtcommService: removeFromPresenceRecord: updating presence record to: ', getPresenceRecord());
+	    		  myEndpointProvider.publishPresence(getPresenceRecord());
+	    	  }
+	      },
+
+	      setPresenceRecordState:function(state) {
+	    	  getPresenceRecord().state = state;
+	    	  return myEndpointProvider.publishPresence(getPresenceRecord());
+	      },
+	      
+	      // Endpoint related methods
+	      getEndpoint : function(uuid) {
 			  var endpoint = null;
 
 			  if ((typeof uuid === "undefined") || uuid == null)
@@ -282,11 +362,11 @@ rtcommModule.factory('RtcommService', function ($rootScope, RtcommConfig, $log) 
 				  endpoint = myEndpointProvider.getRtcommEndpoint(uuid);
 				  
 			  return (endpoint);
-		   },
+		  },
 
 		  destroyEndpoint : function(uuid) {
 			  myEndpointProvider.getRtcommEndpoint(uuid).destroy();
-		   },
+		  },
 
 		  //	Registration related methods.
 		  register : function(userid) {
@@ -298,9 +378,9 @@ rtcommModule.factory('RtcommService', function ($rootScope, RtcommConfig, $log) 
 			   }
 			   else
 				   $log.error('rtcomm-services: register: ERROR: endpoint provider already initialized');
-		   },
+		  },
 
-		   unregister : function() {
+		  unregister : function() {
 			   if (endpointProviderInitialized == true){
 				   myEndpointProvider.destroy();
 				   endpointProviderInitialized = false;
@@ -308,59 +388,59 @@ rtcommModule.factory('RtcommService', function ($rootScope, RtcommConfig, $log) 
 			   }
 			   else
 				   $log.error('rtcomm-services: unregister: ERROR: endpoint provider not initialized');
-		   },
+		  },
 		   
-		   // Queue related methods
-		   joinQueue : function(queueID) {
+		  // Queue related methods
+		  joinQueue : function(queueID) {
 			   myEndpointProvider.joinQueue(queueID);
-		   },
+		  },
 
-		   leaveQueue : function(queueID) {
+		  leaveQueue : function(queueID) {
 			   myEndpointProvider.leaveQueue(queueID);
-		   },
+		  },
 
-		   getQueues : function() {
+		  getQueues : function() {
 			   return(queueList);
-			},
+		  },
 
-			/**
-			 * Chat related methods
-			 */
-			sendChatMessage : function(chat, endpointUUID){
-				//	Save this chat in the local session store
-				var session = getSession(endpointUUID);
-				session.chats.push(chat);
-				
-				myEndpointProvider.getRtcommEndpoint(endpointUUID).chat.send(chat.message);
-			},
+		/**
+		 * Chat related methods
+		 */
+		sendChatMessage : function(chat, endpointUUID){
+			//	Save this chat in the local session store
+			var session = getSession(endpointUUID);
+			session.chats.push(chat);
 			
-			getChats : function(endpointUUID) {
-				var session = getSession(endpointUUID);
-				if (session != null)
-					return (session.chats);
-				else
-					return(null);
-			},
-
-			isWebrtcConnected : function(endpointUUID) {
-				var session = getSession(endpointUUID);
-				if (session != null)
-					return (session.webrtcConnected);
-				else
-					return(false);
-			},
-
-			isSessionStarted : function(endpointUUID) {
-				var session = getSession(endpointUUID);
-				if (session != null)
-					return (session.sessionStarted);
-				else
-					return(false);
-			},
+			myEndpointProvider.getRtcommEndpoint(endpointUUID).chat.send(chat.message);
+		},
 			
-			setAlias : function(aliasID) {
-				if ((typeof aliasID !== "undefined") && aliasID != '')
-					myEndpointProvider.setUserID(aliasID); 
-			}
+		getChats : function(endpointUUID) {
+			var session = getSession(endpointUUID);
+			if (session != null)
+				return (session.chats);
+			else
+				return(null);
+		},
+
+		isWebrtcConnected : function(endpointUUID) {
+			var session = getSession(endpointUUID);
+			if (session != null)
+				return (session.webrtcConnected);
+			else
+				return(false);
+		},
+
+		isSessionStarted : function(endpointUUID) {
+			var session = getSession(endpointUUID);
+			if (session != null)
+				return (session.sessionStarted);
+			else
+				return(false);
+		},
+		
+		setAlias : function(aliasID) {
+			if ((typeof aliasID !== "undefined") && aliasID != '')
+				myEndpointProvider.setUserID(aliasID); 
+		}
 	  };
 });

@@ -2940,6 +2940,9 @@ var EndpointProvider =  function EndpointProvider() {
         endpoint.setEndpointConnection(endpointConnection);
       });
     }
+    if (this._.presenceMonitor) {
+      this._.presenceMonitor.setEndpointConnection(endpointConnection);
+    }
     // Propogate our loglevel
     //
     endpointConnection.setLogLevel(getLogLevel());
@@ -3115,8 +3118,13 @@ var EndpointProvider =  function EndpointProvider() {
     return new MqttEndpoint({connection: this.dependencies.endpointConnection});
   };
 
-  /** get the Presence Monitor
-   * @returns {module:rtcomm.PresenceMonitor} */
+  /** 
+   * Get the PresenceMonitor Object 
+   *
+   * This object is used to add topics to monitor for presence. 
+   *
+   * @returns {module:rtcomm.PresenceMonitor}
+   */
   this.getPresenceMonitor= function(topic) {
     console.log('this._ is: ', this._);
     console.log('this is: ', this);
@@ -3126,8 +3134,6 @@ var EndpointProvider =  function EndpointProvider() {
     } 
     return this._.presenceMonitor;
   };
-
-
   /** 
    * Destroy all endpoints and cleanup the endpointProvider.
    */
@@ -3136,6 +3142,7 @@ var EndpointProvider =  function EndpointProvider() {
     this.clearEventListeners();
     // Clear callbacks
     this._.endpointRegistry.destroy();
+    this._.presenceMonitor.destroy();
     l('DEBUG') && console.log(this+'.destroy() Finished cleanup of endpointRegistry');
     this.dependencies.endpointConnection && this.dependencies.endpointConnection.destroy();
     this.dependencies.endpointConnection = null;
@@ -3185,9 +3192,16 @@ var EndpointProvider =  function EndpointProvider() {
       });
       l('DEBUG') && console.log(this+'.setUserID() Set userid to: '+userid);
     }
+    return this;
   };
   /**
    * Make your presence available
+   *
+   * @param {object} presenceConfig 
+   * @param {string} presenceConfig.state One of 'available', 'unavailable', 'away', 'busy'
+   * @param {string} presenceConfig.alias An alias to be associated with the presence record
+   * @param {array} presenceConfig.userDefines  Array of userdefined objects associated w/ presence
+   *
    */
   this.publishPresence = function(presenceConfig) {
 
@@ -3207,6 +3221,7 @@ var EndpointProvider =  function EndpointProvider() {
     // build a message, publish it as retained.
     var doc = this.getEndpointConnection().createPresenceDocument(presenceConfig);
     this.getEndpointConnection().publishPresence(doc);
+    return this;
   };
   /**
    * Update queues from server
@@ -3788,17 +3803,23 @@ PresenceNode.prototype = util.RtcommBaseObject.extend({
     var nodeToDelete = this.findSubNode(nodes);
     // We found the end node
     if (nodeToDelete) {
+      l('DEBUG') && console.debug(this+'.deleteSubNode() Deleting Node: '+nodeToDelete.name);
       // have to find its parent.
       var parentNode = this.findSubNode(nodes.slice(0, nodes.length-1));
       var index = parentNode.nodes.indexOf(nodeToDelete);
       // Remove it.
       parentNode.nodes.splice(index,1);
+    } else {
+      l('DEBUG') && console.debug(this+'.deleteSubNode() Node not found for topic: '+topic);
     }
   },
   addPresence: function addPresence(topic,presenceMessage) {
     var presence = this.getSubNode(topic);
     l('DEBUG') && console.debug(this+'.addPresence() created node: ', presence);
     presence.record = true;
+    if (typeof presenceMessage.self !== 'undefined') {
+      presence.self = presenceMessage.self;
+    }
     if (presenceMessage.content) {
       var msg = null;
       if (typeof presenceMessage.content === 'string') {
@@ -3844,12 +3865,15 @@ PresenceMonitor.prototype = util.RtcommBaseObject.extend((function() {
     // do we need a timer?  or something to delay emitting the initial event?
     // pull out the topic:
     l('DEBUG') && console.debug('PresenceMonitor received message: ', message);
-
     var endpointID = message.fromEndpointID;
     // Following removes the endpointID, we don't need to do that.
     // var r = new RegExp('(^\/.+)\/'+endpointID+'$');
     // Remove the sphere Topic
     var r = new RegExp('^'+this._.sphereTopic+'(.+)$');
+    if (this.dependencies.connection.getMyPresenceTopic() === message.topic) {
+      // Add a field to message
+      message.self = true;
+    }
     var topic = r.exec(message.topic)[1];
     var presence = this.getRootNode(topic);
     if (presence) {
@@ -3896,6 +3920,12 @@ PresenceMonitor.prototype = util.RtcommBaseObject.extend((function() {
       }
       return this;
     },
+    setEndpointConnection: function setEndpointConnection(connection) {
+      if (connection) {
+        this.dependencies.connection = connection;
+        this._.sphereTopic = normalizeTopic(connection.getPresenceRoot()) ||  null;
+      }
+    },
     getPresenceData: function getPresenceData() {
       return this._.presenceData;
     },
@@ -3918,6 +3948,9 @@ PresenceMonitor.prototype = util.RtcommBaseObject.extend((function() {
   destroy: function() {
        l('DEBUG') &&  console.log('Destroying mqtt(unsubscribing everything... ');
        var pm = this;
+       // Wipe out the data... 
+       this._.presenceData = [];
+       // Unsubscribe ..
        Object.keys(this._.subscriptions).forEach( function(key) {
          pm.unsubscribe(key);
        });

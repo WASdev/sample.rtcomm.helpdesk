@@ -17,8 +17,14 @@ rtcommModule.directive('rtcommSessionmgr', ['RtcommService', '$log', function(Rt
 
 		$scope.sessions = [];
 		$scope.sessMgrActiveEndpointUUID = null;
+		$scope.publishPresence = false;
 
-        $scope.$on('endpointActivated', function (event, endpointUUID) {
+		$scope.init = function(publishPresence) {
+			$scope.publishPresence = publishPresence;
+	    	$scope.updatePresence();
+	  	};
+
+	  	$scope.$on('endpointActivated', function (event, endpointUUID) {
         	//	Not to do something here to show that this button is live.
             $log.debug('rtcommSessionmgr: endpointActivated =' + endpointUUID);
             
@@ -43,6 +49,7 @@ rtcommModule.directive('rtcommSessionmgr', ['RtcommService', '$log', function(Rt
             session.remoteEndpointID = eventObject.endpoint.getRemoteEndpointID();
 			
 			$scope.sessions.push(session);
+	    	$scope.updatePresence();
 			
 	        $rootScope.$broadcast('endpointActivated', eventObject.endpoint.id);
         });
@@ -82,6 +89,7 @@ rtcommModule.directive('rtcommSessionmgr', ['RtcommService', '$log', function(Rt
 			    	else{
 				        $rootScope.$broadcast('noEndpointActivated');
 			    	}
+			    	$scope.updatePresence();
 			    	break;
 			    }
 			}
@@ -106,6 +114,15 @@ rtcommModule.directive('rtcommSessionmgr', ['RtcommService', '$log', function(Rt
 			
         	return (session);
         };
+        
+		$scope.updatePresence = function(){
+			//	Update the presence record if enabled
+			if ($scope.publishPresence == true){
+				RtcommService.addToPresenceRecord ([{
+					'name' : "sessions",
+					'value' : String($scope.sessions.length)}]);
+			}
+		};
         
       },
       controllerAs: 'sessionmgr'
@@ -226,6 +243,30 @@ rtcommModule.directive('rtcommQueues', ['RtcommService', '$log', function(Rtcomm
  * This directive manages the chat portion of a session. The data model for chat
  * is maintained in the RtcommService. This directive handles switching between
  * active endpoints.
+ * 
+ * Here is the formate of the presenceData:
+ * 
+ * 		This is a Node:
+ *  	                {
+ *	                		"name" : "agents",
+ *	                		"record" : false,
+ *	                		"nodes" : []
+ *	                	}
+ *	                	
+ *		This is a record with a set of user defines:
+ *						{   	            
+ *							"name" : "Brian Pulito",
+ *    	    	            "record" : true,
+ *   	                	"nodes" : [
+ *									{
+ *	                      				"name" : "queue",
+ *	                      			    "value" : "appliances"
+ *	                      			},
+ *	                      			{
+ *										"name" : "sessions",
+ *	                      			    "value" : "3"
+ *	                      			}
+ *								]
  */
 
 rtcommModule.directive("rtcommPresence", ['RtcommService', '$log', function(RtcommService, $log) {
@@ -273,102 +314,6 @@ rtcommModule.directive("rtcommPresence", ['RtcommService', '$log', function(Rtco
 		    	  presenceMonitor.add($scope.monitorTopics[index]);
 		      }
 	      });
-
-	      /*
-       	  $scope.presenceData = [
- 	                	{
-	                		"name" : "us",
-	                		"record" : false,
-	                		"nodes" : [
-    	                	{
-    	                		"name" : "agents",
-    	                		"record" : false,
-    	                		"nodes" : [
-    	                			{
-    	                				"name" : "Brian Pulito",
-    	    	                		"record" : true,
-    	                	      		"nodes" : [
-	                      			                {
-	                      			                	"name" : "queue",
-	                      			                	"value" : "appliances",
-                      			                		"record" : false
-	                      			                },
-	                      			                {
-	                      			                	"name" : "queue",
-	                      			                	"value" : "electronics",
-                      			                		"record" : false
-	                      			                },
-	                      			                {
-	                      			                	"name" : "sessions",
-	                      			                	"value" : "3",
-                      			                		"record" : false
-	                      			                }
-	                      			       ]
-	                			},
-	                			{
-	                				"name" : "Scott Graham",
-	    	                		"record" : true,
-	                      			"nodes" : [
-	                      			                {
-	                      			                	"name" : "queue",
-	                      			                	"value" : "appliances",
-                      			                		"record" : false
-	                      			                },
-	                      			                {
-	                      			                	"name" : "queue",
-	                      			                	"value" : "electronics",
-                      			                		"record" : false
-	                      			                },
-	                      			                {
-	                      			                	"name" : "sessions",
-	                      			                	"value" : "3",
-                      			                		"record" : false
-	                      			                }
-	                      			       ]
-   	                				}
-    	                		]
-    	                	},
-    	                	{
-    	                		"name" : "customers",
-    	                		"nodes" : [
-    	                			{
-    	                				"name" : "Jim Lawwill",
-    	    	                		"record" : true,
-    	                	      		"nodes" : [
-	                      			                {
-	                      			                	"name" : "page",
-	                      			                	"value" : "url",
-                    	    	                		"record" : false
-	                      			                },
-	                      			                {
-	                      			                	"name" : "vip",
-	                      			                	"value" : "true",
-	                    	    	                	"record" : false
-	                      			                }
-    	                      			       ]
-    	                			},
-    	                			{
-    	                				"name" : "Tibor Beres",
-    	    	                		"record" : true,
-    	                	      		"nodes" : [
-	                      			                {
-	                      			                	"name" : "page",
-	                      			                	"value" : "url",
-	                    	    	                	"record" : false
-	                      			                },
-	                      			                {
-	                      			                	"name" : "vip",
-	                      			                	"value" : "true",
-	                    	    	                	"record" : false
-	                      			                }
-	                      			            ]
-    	                			}
-    	                		]
-    	                	}
-    	               ]
- 	           }
- 	       ];
- 	       */
 
       },
 	  controllerAs: 'presence'
