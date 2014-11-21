@@ -18,6 +18,7 @@ rtcommModule.directive('rtcommSessionmgr', ['RtcommService', '$log', function(Rt
 		$scope.sessions = [];
 		$scope.sessMgrActiveEndpointUUID = null;
 		$scope.publishPresence = false;
+		$scope.sessionPresenceData = [];
 
 		$scope.init = function(publishPresence) {
 			$scope.publishPresence = publishPresence;
@@ -118,9 +119,13 @@ rtcommModule.directive('rtcommSessionmgr', ['RtcommService', '$log', function(Rt
 		$scope.updatePresence = function(){
 			//	Update the presence record if enabled
 			if ($scope.publishPresence == true){
-				RtcommService.addToPresenceRecord ([{
+				RtcommService.removeFromPresenceRecord ($scope.sessionPresenceData, false);
+				
+				$scope.sessionPresenceData = [{
 					'name' : "sessions",
-					'value' : String($scope.sessions.length)}]);
+					'value' : String($scope.sessions.length)}];
+				
+				RtcommService.addToPresenceRecord ($scope.sessionPresenceData);
 			}
 		};
         
@@ -185,10 +190,13 @@ rtcommModule.directive('rtcommQueues', ['RtcommService', '$log', function(Rtcomm
 		controller : function($scope) {
 			$scope.rQueues = [];
 			$scope.autoJoinQueues = false;
+			$scope.queuePresenceData = [];
+			$scope.queuePublishPresence = false;
 			
-			$scope.init = function(autoJoinQueues) {
+			$scope.init = function(autoJoinQueues, queuePublishPresence) {
 				$log.debug('rtcommQueues: autoJoinQueues = ' + autoJoinQueues);
 				$scope.autoJoinQueues = autoJoinQueues;
+				$scope.queuePublishPresence = queuePublishPresence;
     	  	};
 
 			$scope.$on('queueupdate', function(event, queues) {
@@ -203,6 +211,8 @@ rtcommModule.directive('rtcommQueues', ['RtcommService', '$log', function(Rtcomm
 						$scope.onQueueClick(queues[key]);
 					}
 				});
+				
+				$scope.updateQueuePresence();
 			});
 			
 	        $scope.$on('rtcomm::init', function (event, success, details) {
@@ -232,6 +242,29 @@ rtcommModule.directive('rtcommQueues', ['RtcommService', '$log', function(Rtcomm
 						$log.debug('rtcommQueues: ERROR: queue.endpointID: ' + queue.endpointID + ' not found in list of queues');
 				    	
 				    }
+				}
+				
+				$scope.updateQueuePresence();
+			};
+			
+			$scope.updateQueuePresence = function(){
+				//	Update the presence record if enabled
+				if ($scope.queuePublishPresence == true){
+					RtcommService.removeFromPresenceRecord ($scope.queuePresenceData, false);
+					
+					$scope.queuePresenceData = [];
+					
+					for	(var index = 0; index < $scope.rQueues.length; index++) {
+					    if($scope.rQueues[index].active === true){
+					    	$scope.queuePresenceData.push (
+					    			{
+					    				'name' : "queue",
+										'value' : $scope.rQueues[index].endpointID	
+					    			});
+					    }
+					}
+
+					RtcommService.addToPresenceRecord ($scope.queuePresenceData);
 				}
 			};
 		},

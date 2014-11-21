@@ -384,6 +384,10 @@ var RtcommBaseObject = {
       if (this.events && this.events[event] ) {
      //   console.log('>>>>>>>> Firing event '+event);
         l('EVENT', this) && console.log(this+".emit()  for event["+event+"]", self.events[event].length);
+        // Save the event
+        if (typeof self.lastEvent !== 'undefined') {
+          self.lastEvent = event;
+        };
          // Event exists, call all callbacks
         self.events[event].forEach(function(callback) {
             if (typeof callback === 'function') {
@@ -3142,7 +3146,8 @@ var EndpointProvider =  function EndpointProvider() {
     this.clearEventListeners();
     // Clear callbacks
     this._.endpointRegistry.destroy();
-    this._.presenceMonitor.destroy();
+    this._.presenceMonitor && this._.presenceMonitor.destroy();
+    this._.presenceMonitor = null;
     l('DEBUG') && console.log(this+'.destroy() Finished cleanup of endpointRegistry');
     this.dependencies.endpointConnection && this.dependencies.endpointConnection.destroy();
     this.dependencies.endpointConnection = null;
@@ -3835,7 +3840,46 @@ PresenceNode.prototype = util.RtcommBaseObject.extend({
     this.deleteSubNode(topic);
   }
 });
-
+/**
+ * @class
+ * @memberof module:rtcomm
+ * @classdesc
+ * An object that can be used to monitor presence on topics.
+ * <p>
+ *
+ * <p>
+ *
+ * @requires {@link mqttws31.js}
+ *
+ */
+/**
+ *  @memberof module:rtcomm
+ *  @description
+ *  This object can only be created with the {@link module:rtcomm.EndpointProvider#getPresenceMonitor|getPresenceMonitor} function.
+ *  <p>
+ *
+ * The PresenceMonitor object provides an interface for the UI Developer to monitor presence of
+ * other EndpointProviders that have published their presence w/ the
+ * {@link module:rtcomm.EndpointProvider#publishPresence|publishPresence} function.
+ *
+ * Once created, it is necessary to 'add' a topic to monitor.  This topic can be nested and will 
+ * look something like: 'us/agents' in order to monitor the presence of agents in the US.  
+ *
+ * This can go as deep as necessary.
+ *
+ * The presenceData is kept up to date in the PresenceMonitor.getPresenceData() object.
+ *  @constructor
+ *  @extends  module:rtcomm.util.RtcommBaseObject
+ *
+ *
+ * @example
+ *
+ * // After creating and initializing the EndpointProvider (EP)
+ *
+ * var presenceMonitor = EP.getPresenceMonitor();
+ * presenceMonitor.add('us/agents');
+ * var presenceData = presenceMonitor.getPresenceData();
+ */
 var PresenceMonitor= function PresenceMonitor(config) {
   // Standard Class attributes
   this.objName = 'PresenceMonitor';
@@ -3853,6 +3897,11 @@ var PresenceMonitor= function PresenceMonitor(config) {
   this.dependencies.connection = config && config.connection;
   this._.sphereTopic = (config && config.connection) ? normalizeTopic(config.connection.getPresenceRoot()) : null;
   this.events = {
+    /**
+     * The presenceData has been updated.  
+     * @event module:rtcomm.PresenceMonitor#updated
+     * @property {module:rtcomm.presenceData}
+     */
     'updated': [],
     };
 };
@@ -3883,7 +3932,7 @@ PresenceMonitor.prototype = util.RtcommBaseObject.extend((function() {
       } else {
          presence.removePresence(topic, endpointID);
       }
-      this.emit('updated');
+      this.emit('updated', this.getPresenceData());
     } else {
       // No Root Node
       l('DEBUG') && console.error('No Root node... dropping presence message');
@@ -3891,6 +3940,12 @@ PresenceMonitor.prototype = util.RtcommBaseObject.extend((function() {
   }
 
   return { 
+    /**
+     * Add a topic to monitor presence on
+     *
+     * @param {string} topic  A topic/group to monitor, ex. 'us/agents'
+     *
+     */
     add: function add(topic) {
       var presenceData = this._.presenceData;
       // Validate our topic... 
@@ -3916,7 +3971,7 @@ PresenceMonitor.prototype = util.RtcommBaseObject.extend((function() {
         this._.subscriptions.push(subscriptionTopic);
       } else {
         // No Sphere topic.
-        console.error('No Sphere topic, not connected?');
+        throw new Error('Adding a topic to monitor requires the EndpointProvider be initialized');
       }
       return this;
     },
@@ -3926,9 +3981,20 @@ PresenceMonitor.prototype = util.RtcommBaseObject.extend((function() {
         this._.sphereTopic = normalizeTopic(connection.getPresenceRoot()) ||  null;
       }
     },
+    /**
+     * Get an array representing the presence data
+     * @returns {array} An array of PresenceNodes
+     */
     getPresenceData: function getPresenceData() {
       return this._.presenceData;
     },
+
+    /**
+     * Return the root presenceNode if it exists.
+     *
+     * @param {string} topic
+     * @returns {PresenceNode} The root PresenceNode for a topic (if it already exists)
+     */
     getRootNode: function getRootNode(topic) {
       var rootNode = null;
       var rootTopic = null;
@@ -3945,6 +4011,11 @@ PresenceMonitor.prototype = util.RtcommBaseObject.extend((function() {
      return rootNode;
     },
 
+  /**
+   * Destroy the PresenceMonitor 
+   *  Unsubscribes from presence topics
+   *
+   */
   destroy: function() {
        l('DEBUG') &&  console.log('Destroying mqtt(unsubscribing everything... ');
        var pm = this;
@@ -4064,6 +4135,7 @@ var RtcommEndpoint = (function invocation(){
 
     this.events = {
       'message': [],
+      'ringing': [],
       'connected': [],
       'alerting': [],
       'disconnected': []
@@ -4172,6 +4244,9 @@ var RtcommEndpoint = (function invocation(){
 
   var createChat = function createChat(parent) {
     var chat = new Chat(parent);
+    chat.on('ringing', function(event_obj) {
+      (parent.lastEvent !== 'session:ringing') && parent.emit('session:ringing');
+    });
     chat.on('message', function(message) {
       parent.emit('chat:message', {'message': message});
     });
@@ -4186,7 +4261,6 @@ var RtcommEndpoint = (function invocation(){
     chat.on('disconnected', function() {
       parent.emit('chat:disconnected');
     });
-
     return chat;
   };
 
@@ -4195,7 +4269,7 @@ var RtcommEndpoint = (function invocation(){
     /* globals WebRTCConnection:false */
     var webrtc = new WebRTCConnection(parent);
     webrtc.on('ringing', function(event_obj) {
-      parent.emit('session:ringing');
+      (parent.lastEvent !== 'session:ringing') && parent.emit('session:ringing');
     });
     webrtc.on('alerting', function(event_obj) {
       parent.emit('session:alerting', {protocols: 'webrtc'});
@@ -4255,6 +4329,8 @@ var RtcommEndpoint = (function invocation(){
       media : { In : null,
                Out: null},
     };
+    // Used to store the last event emitted;
+    this.lastEvent = null;
     var self = this;
     config && Object.keys(config).forEach(function(key) {
       self.config[key] = config[key];
@@ -4310,6 +4386,12 @@ var RtcommEndpoint = (function invocation(){
          *
          */
         "session:refer": [],
+        /**
+         * A peer has been reached, but not connected (inbound/outound)
+         * @event module:rtcomm.RtcommEndpoint#session:ringing
+         * @property {module:rtcomm.RtcommEndpoint~Event}
+         */
+        "session:trying": [],
         /**
          * A peer has been reached, but not connected (inbound/outound)
          * @event module:rtcomm.RtcommEndpoint#session:ringing
@@ -4415,7 +4497,11 @@ RtcommEndpoint.prototype = util.RtcommBaseObject.extend((function() {
   //
   function addSessionCallbacks(context, session) {
      // Define our callbacks for the session.
-    session.on('pranswer', function(content){
+    // received a pranswer
+    session.on('have_pranswer', function(content){
+      // Got a pranswer:
+      console.log('REMOVE ME: Recieved a PRANSWER! lastEvent is: ', context.lastEvent);
+      context.emit('session:ringing');
       context._processMessage(content);
     });
     session.on('message', function(content){
@@ -4436,6 +4522,7 @@ RtcommEndpoint.prototype = util.RtcommBaseObject.extend((function() {
       context.disconnect();
     });
     session.on('starting', function() {
+      context.emit('session:trying');
       console.log('Session Starting');
     });
     session.on('failed', function(message) {
@@ -4487,6 +4574,7 @@ return  {
            // If we need to pranswer, processMessage can handle it.
            this._processMessage(session.message.peerContent);
          } else {
+           session.pranswer();
            this.emit('session:alerting', {protocols:''});
            //session.respond();
          }
@@ -4569,9 +4657,12 @@ return  {
       this.available(false);
       this._.activeSession = createSignalingSession(endpointid, this);
       addSessionCallbacks(this, this._.activeSession);
-      if (this.config.webrtc && this.webrtc._connect(this._.activeSession.start.bind(this._.activeSession))) {
+      this.emit('session:trying');
+      if (this.config.webrtc && 
+          this.webrtc._connect(this._.activeSession.start.bind(this._.activeSession))) {
         l('DEBUG') && console.log(this+'.connect() initiating with webrtc._connect');
-      } else if (this.config.chat && this.chat._connect(this._.activeSession.start.bind(this._.activeSession))){
+      } else if (this.config.chat && 
+                 this.chat._connect(this._.activeSession.start.bind(this._.activeSession))){
         l('DEBUG') && console.log(this+'.connect() initiating with chat._connect');
       } else {
         l('DEBUG') && console.log(this+'.connect() sending startMessage w/ no content');

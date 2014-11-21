@@ -298,17 +298,6 @@ rtcommModule.factory('RtcommService', function ($rootScope, RtcommConfig, $log) 
 	       */
 	      addToPresenceRecord:function(userDefines) {
 	    	  
-	    	  // First remove this record if it already exist.
-	    	  for (var i = 0; i < userDefines.length; i++) {
-		    	  for (var j = 0; j < getPresenceRecord().userDefines.length; j++) {
-		    		  
-		    		  if (getPresenceRecord().userDefines[j].name == userDefines[i].name){
-			    		  getPresenceRecord().userDefines.splice(j,1);
-		    			  break;
-		    		  }
-		    	  }
-  			  }
-	    	  
  			  for (var index = 0; index < userDefines.length; index++) {
  				 getPresenceRecord().userDefines.push(userDefines[index]);
  			  }
@@ -329,7 +318,7 @@ rtcommModule.factory('RtcommService', function ($rootScope, RtcommConfig, $log) 
 	       *    
 	       *    The only rule is that some name and some value have to both be strings.
 	       */
-	      removeFromPresenceRecord:function(userDefines) {
+	      removeFromPresenceRecord:function(userDefines, doPublish) {
 
 	    	  for (var i = 0; i < userDefines.length; i++) {
 		    	  for (var j = 0; j < getPresenceRecord().userDefines.length; j++) {
@@ -341,7 +330,7 @@ rtcommModule.factory('RtcommService', function ($rootScope, RtcommConfig, $log) 
 		    	  }
   			  }
 	    	  
-	    	  if (endpointProviderInitialized == true){
+	    	  if ((endpointProviderInitialized == true) && doPublish){
 	              $log.debug('RtcommService: removeFromPresenceRecord: updating presence record to: ', getPresenceRecord());
 	    		  myEndpointProvider.publishPresence(getPresenceRecord());
 	    	  }
