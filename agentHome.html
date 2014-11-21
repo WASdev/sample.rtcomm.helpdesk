@@ -75,42 +75,39 @@
 				<!-- Can init here without user input if the userid is known when the page is loaded. -->	
 		        <rtcomm-register ng-init="init('')"></rtcomm-register>
 
-				<rtcomm-queues ng-init="init(true)"></rtcomm-queues>
+				<!-- The first boolean in this init tells the queue controller to auto join any available queues. -->
+				<!-- The second boolean in this init tell the queue controller to publish queue information in its presence doc.-->
+				<rtcomm-queues ng-init="init(true,true)"></rtcomm-queues>
 				
-				<!-- 
-				<rtcomm-presence></rtcomm-presence>
-				 -->
+				<rtcomm-presence ng-init="monitorTopics=['agents','customers']"></rtcomm-presence>
 
 			</div>
 
 			<div class="col-md-9">
-				<!-- div class=session-mgr-container -->
-					<rtcomm-endpoint ng-init="init(true)">
-						<div class="row">
-							<div>
-								<div class="col-md-4 nopaddng-right vertical-stretch">
-									<rtcomm-chat></rtcomm-chat>
-								</div>
-									
-								<div class="col-md-8 nopadding-left">
-									<rtcomm-video></rtcomm-video>
-								</div>
+				<rtcomm-endpoint ng-init="init(true)">
+					<div class="row">
+						<div>
+							<div class="col-md-4 nopaddng-right vertical-stretch">
+								<rtcomm-chat></rtcomm-chat>
 							</div>
-						</div> <!-- row -->
-		
-						<div class="row">
-							<div class="col-md-12">
-								<rtcomm-endpointctrl></rtcomm-endpointctrl>
+								
+							<div class="col-md-8 nopadding-left">
+								<rtcomm-video></rtcomm-video>
 							</div>
-						</div> <!-- row -->
-					</rtcomm-endpoint> 
-					
-					<!-- rtcomm-sessionmgr></rtcomm-sessionmgr -->
-				<!-- /div -->
+						</div>
+					</div> <!-- row -->
+	
+					<div class="row">
+						<div class="col-md-12">
+							<rtcomm-endpointctrl></rtcomm-endpointctrl>
+						</div>
+					</div> <!-- row -->
+				</rtcomm-endpoint> 
 			</div>
 		</div>
 		<div class="row">
-			<rtcomm-sessionmgr></rtcomm-sessionmgr>
+			<!-- init'ing to true means active session count will be reported to presence if presence is active. -->	
+			<rtcomm-sessionmgr ng-init="init(true)"></rtcomm-sessionmgr>
 		</div>
 	</div>
 </body>
