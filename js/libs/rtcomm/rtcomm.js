@@ -326,9 +326,11 @@ var RtcommBaseObject = {
      * Methods
      */
     setState : function(value) {
-      if (this.states.hasOwnProperty(value)) {
+      if (typeof this.state !== 'undefined') {
         this.state = value;
         this.emit(value);
+      } else {
+        this.emit(value)
       }
     },
     listEvents : function() {
@@ -1372,7 +1374,8 @@ var MessageFactory = (function (){
       'reason': null,
       'toEndpointID': null,
       'appContext': null,
-      'holdTimeout': null
+      'holdTimeout': null,
+      'queuePosition': null
   };
   
   // Override base headers and add new headers for the OUTBOUND message
@@ -2039,6 +2042,7 @@ var SigSession = function SigSession(config) {
       'failed':[],
       'stopped':[],
       'message':[],
+      'queued':[],
       'ice_candidate':[],
       'have_pranswer':[],
       'pranswer':[],
@@ -2340,6 +2344,9 @@ SigSession.prototype = util.RtcommBaseObject.extend((function() {
         if (!message.holdTimeout) {
           this.state = 'have_pranswer';
           this.emit('have_pranswer', message.peerContent);
+        } else {
+          this.state = 'queued';
+          this.emit('queued', message.peerContent);
         }
         break;
       case 'ICE_CANDIDATE':
@@ -4331,6 +4338,9 @@ var RtcommEndpoint = (function invocation(){
     };
     // Used to store the last event emitted;
     this.lastEvent = null;
+    // Used to store the last event emitted;
+    //
+    this.state = 'session:stopped';
     var self = this;
     config && Object.keys(config).forEach(function(key) {
       self.config[key] = config[key];
@@ -4393,6 +4403,12 @@ var RtcommEndpoint = (function invocation(){
          */
         "session:trying": [],
         /**
+         * A Queue has been contacted and we are waiting for a response.
+         * @event module:rtcomm.RtcommEndpoint#session:queued
+         * @property {module:rtcomm.RtcommEndpoint~Event}
+         */
+        "session:queued": [],
+        /**
          * A peer has been reached, but not connected (inbound/outound)
          * @event module:rtcomm.RtcommEndpoint#session:ringing
          * @property {module:rtcomm.RtcommEndpoint~Event}
@@ -4410,12 +4426,6 @@ var RtcommEndpoint = (function invocation(){
          * @property {module:rtcomm.RtcommEndpoint~Event}
          */
         "session:failed": [],
-        /**
-         * The remote party rejected establishing the session
-         * @event module:rtcomm.RtcommEndpoint#session:rejected
-         * @property {module:rtcomm.RtcommEndpoint~Event}
-         */
-        "session:rejected": [],
         /**
          * The session has stopped
          * @event module:rtcomm.RtcommEndpoint#session:stopped
@@ -4501,7 +4511,12 @@ RtcommEndpoint.prototype = util.RtcommBaseObject.extend((function() {
     session.on('have_pranswer', function(content){
       // Got a pranswer:
       console.log('REMOVE ME: Recieved a PRANSWER! lastEvent is: ', context.lastEvent);
-      context.emit('session:ringing');
+      context.setState('session:ringing');
+      context._processMessage(content);
+    });
+    session.on('queued', function(content){
+      l('DEBUG') && console.log('SigSession callback called to queue: ', content);
+      context.setState('session:queued');
       context._processMessage(content);
     });
     session.on('message', function(content){
@@ -4514,20 +4529,20 @@ RtcommEndpoint.prototype = util.RtcommBaseObject.extend((function() {
       if (context._.referralSession) {
         context._.referralSession.respond(true);
       }
-      context.emit('session:started');
+      context.setState('session:started');
     });
     session.on('stopped', function(message) {
       // In this case, we should disconnect();
-      context.emit('session:stopped');
+      context.setState('session:stopped');
       context.disconnect();
     });
     session.on('starting', function() {
-      context.emit('session:trying');
+      context.setState('session:trying');
       console.log('Session Starting');
     });
     session.on('failed', function(message) {
       context.disconnect();
-      context.emit('session:failed',{reason: message});
+      context.setState('session:failed',{reason: message});
     });
     l('DEBUG') && console.log(context+' createSignalingSession created!', session);
    // session.listEvents();
@@ -4575,7 +4590,7 @@ return  {
            this._processMessage(session.message.peerContent);
          } else {
            session.pranswer();
-           this.emit('session:alerting', {protocols:''});
+           this.setState('session:alerting', {protocols:''});
            //session.respond();
          }
          this.available(false);
@@ -4604,7 +4619,7 @@ return  {
         }
       } else if (content.type === 'refer') {
         this._.referralSession && this._.referralSession.pranswer();
-        this.emit('session:refer');
+        this.setState('session:refer');
       } else {
         if (this.config.webrtc && this.webrtc) { 
           // calling enable will enable if not already enabled... 
@@ -4657,7 +4672,7 @@ return  {
       this.available(false);
       this._.activeSession = createSignalingSession(endpointid, this);
       addSessionCallbacks(this, this._.activeSession);
-      this.emit('session:trying');
+      this.setState('session:trying');
       if (this.config.webrtc && 
           this.webrtc._connect(this._.activeSession.start.bind(this._.activeSession))) {
         l('DEBUG') && console.log(this+'.connect() initiating with webrtc._connect');
@@ -4683,7 +4698,7 @@ return  {
     if (this.sessionStarted()) {
       this._.activeSession.stop();
       this._.activeSession = null;
-      this.emit('session:stopped');
+      this.setState('session:stopped');
     }
     this.available(true);
     return this;
@@ -4734,8 +4749,13 @@ return  {
   getUserID : function(userid) {
       return this.config.userid; 
   },
+
   setUserID : function(userid) {
       this.userid = this.config.userid = userid;
+  },
+
+  getState: function() {
+    return this.state;
   },
 
   /**

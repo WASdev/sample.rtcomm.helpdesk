@@ -148,9 +148,10 @@ rtcommModule.factory('RtcommService', function ($rootScope, RtcommConfig, $log) 
 			 	},
 
 		  'session:alerting' : callback,
+		  'session:trying' : callback,
 		  'session:ringing' : callback,
+		  'session:queued' : callback,
 		  'session:failed' : callback,
-		  'session:rejected' : callback,
 		  
 		  'session:stopped' : function(eventObject) { 
 	  	 		$log.debug('<<------rtcomm-service------>> - Event: ' + eventObject.eventName + ' remoteEndpointID: ' + eventObject.endpoint.getRemoteEndpointID());
@@ -419,12 +420,8 @@ rtcommModule.factory('RtcommService', function ($rootScope, RtcommConfig, $log) 
 				return(false);
 		},
 
-		isSessionStarted : function(endpointUUID) {
-			var session = getSession(endpointUUID);
-			if (session != null)
-				return (session.sessionStarted);
-			else
-				return(false);
+		getSessionState : function(endpointUUID) {
+			return (myEndpointProvider.getRtcommEndpoint(endpointUUID).getState());
 		},
 		
 		setAlias : function(aliasID) {

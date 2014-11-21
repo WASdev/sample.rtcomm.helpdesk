@@ -407,6 +407,19 @@ rtcommModule.directive('rtcommEndpoint', ['RtcommService', '$log', function(Rtco
  * This directive is used for all the controls related to a single endpoint session. This includes
  * the ability to disconnect the sesssion and the ability to enable A/V for sessions that don't start
  * with A/V. This directive also maintains the enabled and disabled states of all its related controls.
+ * 
+ * This endpoint controller only shows the active endpoint. The $scope.sessionState always contains the 
+ * state of the active endpoint if one exist. It will be one of the following states:
+ * 
+ * 'session:alerting'
+ * 'session:trying' 
+ * 'session:ringing' 
+ * 'session:queued' - for this one $scope.queueCount will tell you where you are in the queue.
+ * 'session:failed' - for this one $scope.reason will tell you why the call failed.
+ * 'session:started' 
+ * 'session:stopped'
+ * 
+ * You can bind to $scope.sessionState to track state in the view.
  */
 rtcommModule.directive('rtcommEndpointctrl', ['RtcommService', '$log', function(RtcommService, $log) {
     return {
@@ -415,13 +428,12 @@ rtcommModule.directive('rtcommEndpointctrl', ['RtcommService', '$log', function(
         controller: function ($scope) {
         	
         	//	Session states.
-        	$scope.DISCONNECTED = "disconnected";
-        	$scope.CONNECTED = "connected";
-
         	$scope.epCtrlActiveEndpointUUID = null;
         	$scope.epCtrlAVConnected = false;
-        	$scope.sessionState = $scope.DISCONNECTED;
+        	$scope.sessionState = 'session:stopped';
         	$scope.epCtrlRemoteEndpointID = null;
+        	$scope.failureReason = '';
+        	$scope.queueCount = 0;
 
 			$scope.disconnect = function() {
 				$log.debug('Disconnecting call for endpoint: ' + $scope.epCtrlActiveEndpointUUID);
@@ -445,17 +457,59 @@ rtcommModule.directive('rtcommEndpointctrl', ['RtcommService', '$log', function(
 			};
 
 			$scope.$on('session:started', function (event, eventObject) {
-			    $log.debug('endointActivated received: endpointID = ' + eventObject.endpoint.id);
+			    $log.debug('session:started received: endpointID = ' + eventObject.endpoint.id);
 				if ($scope.epCtrlActiveEndpointUUID == eventObject.endpoint.id){
-					$scope.sessionState = $scope.CONNECTED;
+					$scope.sessionState = 'session:started';
 		        	$scope.epCtrlRemoteEndpointID = eventObject.endpoint.getRemoteEndpointID();
 				}
 	        });
 
 			$scope.$on('session:stopped', function (event, eventObject) {
-			    $log.debug('endointActivated received: endpointID = ' + eventObject.endpoint.id);
+			    $log.debug('session:stopped received: endpointID = ' + eventObject.endpoint.id);
 				if ($scope.epCtrlActiveEndpointUUID == eventObject.endpoint.id){
-					$scope.sessionState = $scope.DISCONNECTED;
+					$scope.sessionState = 'session:stopped';
+		        	$scope.epCtrlRemoteEndpointID = null;
+				}
+	        });
+
+			$scope.$on('session:failed', function (event, eventObject) {
+			    $log.debug('session:failed received: endpointID = ' + eventObject.endpoint.id);
+				if ($scope.epCtrlActiveEndpointUUID == eventObject.endpoint.id){
+					$scope.sessionState = 'session:failed';
+					$scope.failureReason = eventObject.reason;
+		        	$scope.epCtrlRemoteEndpointID = eventObject.endpoint.getRemoteEndpointID();
+				}
+	        });
+
+			$scope.$on('session:alerting', function (event, eventObject) {
+			    $log.debug('session:alerting received: endpointID = ' + eventObject.endpoint.id);
+				if ($scope.epCtrlActiveEndpointUUID == eventObject.endpoint.id){
+					$scope.sessionState = 'session:alerting';
+		        	$scope.epCtrlRemoteEndpointID = eventObject.endpoint.getRemoteEndpointID();
+				}
+	        });
+
+			$scope.$on('session:queued', function (event, eventObject) {
+			    $log.debug('session:queued received: endpointID = ' + eventObject.endpoint.id);
+				if ($scope.epCtrlActiveEndpointUUID == eventObject.endpoint.id){
+					$scope.sessionState = 'session:queued';
+		        	$scope.epCtrlRemoteEndpointID = eventObject.endpoint.getRemoteEndpointID();
+				}
+	        });
+
+			$scope.$on('session:trying', function (event, eventObject) {
+			    $log.debug('session:trying received: endpointID = ' + eventObject.endpoint.id);
+				if ($scope.epCtrlActiveEndpointUUID == eventObject.endpoint.id){
+					$scope.sessionState = 'session:trying';
+		        	$scope.epCtrlRemoteEndpointID = eventObject.endpoint.getRemoteEndpointID();
+				}
+	        });
+
+			$scope.$on('session:ringing', function (event, eventObject) {
+			    $log.debug('session:ringing received: endpointID = ' + eventObject.endpoint.id);
+				if ($scope.epCtrlActiveEndpointUUID == eventObject.endpoint.id){
+					$scope.sessionState = 'session:ringing';
+		        	$scope.epCtrlRemoteEndpointID = eventObject.endpoint.getRemoteEndpointID();
 				}
 	        });
 
@@ -475,8 +529,7 @@ rtcommModule.directive('rtcommEndpointctrl', ['RtcommService', '$log', function(
 				$scope.epCtrlAVConnected = RtcommService.isWebrtcConnected(endpointUUID);
 				$scope.epCtrlRemoteEndpointID = RtcommService.getEndpoint(endpointUUID).getRemoteEndpointID();
 
-				if (RtcommService.isSessionStarted(endpointUUID) == true)
-					$scope.sessionState = $scope.CONNECTED;
+				$scope.sessionState = RtcommService.getSessionState(endpointUUID);
 	       	});
 	       	
 	       	$scope.$on('noEndpointActivated', function (event) {
