@@ -4,5 +4,6 @@
 	"rtcommTopicPath" : "/rtcomm-helpdesk-demo/",
     "userid" : "",
 	"broadcastAudio" : true,
-	"broadcastVideo" : true
+	"broadcastVideo" : true,
+	"presenceTopic" : "agents"
 }
