@@ -325,12 +325,12 @@ var RtcommBaseObject = {
     /*
      * Methods
      */
-    setState : function(value) {
+    setState : function(value, object) {
       if (typeof this.state !== 'undefined') {
         this.state = value;
-        this.emit(value);
+        this.emit(value,object);
       } else {
-        this.emit(value)
+        this.emit(value,object);
       }
     },
     listEvents : function() {
@@ -363,6 +363,10 @@ var RtcommBaseObject = {
         delete this.events[event];
       }   
     },  
+
+    hasEventListener: function(event){
+     return (event in this.events) && (this.events[event].length > 0);
+    },
 
     /** Establish a listener for an event */
     on : function(event,callback) {
@@ -1714,7 +1718,7 @@ var MqttConnection = function MqttConnection(config) {
     throw new Error("MqttConnection instantiation requires a minimum configuration: "+ JSON.stringify(configDefinition.required));
   }
 
-  console.debug(this+'>>>>>>> constructor config: '+JSON.stringify(this.config));
+  console.log(this+'>>>>>>> constructor config: '+JSON.stringify(this.config));
 
   // Populate this.config
   this.config.clientID = this.config.myTopic || generateClientID();
@@ -1873,9 +1877,9 @@ MqttConnection.prototype  = util.RtcommBaseObject.extend((function() {
        }
       },
       publish: function publish(/* string */ topic, message, /* boolean */retained) {
-        l('DEBUG') && console.debug(this+'.publish() Publishing message',message);
-        l('DEBUG') && console.debug(this+'.publish() To Topic: '+ topic);
-        l('DEBUG') && console.debug(this+'.publish() retained?: '+ retained);
+        l('DEBUG') && console.log(this+'.publish() Publishing message',message);
+        l('DEBUG') && console.log(this+'.publish() To Topic: '+ topic);
+        l('DEBUG') && console.log(this+'.publish() retained?: '+ retained);
         var messageToSend = createMqttMessage(message);
         if (messageToSend) {
           messageToSend.destinationName = topic;
@@ -2341,13 +2345,15 @@ SigSession.prototype = util.RtcommBaseObject.extend((function() {
         var timeout = (typeof message.holdTimeout === 'undefined') ? this.finalTimeout : message.holdTimeout*1000;
         l('TRACE') && console.log('PRANSWER, resetting timeout to :',timeout);
         this._startTransaction && this._startTransaction.setTimeout(timeout);
-        if (!message.holdTimeout) {
+
+        if (message.holdTimeout || message.queuePosition) {
+          // We've been Queued...
+          this.state = 'queued';
+          this.emit('queued', {'queuePosition': message.queuePosition, 'message': message.peerContent});
+        } else {
           this.state = 'have_pranswer';
           this.emit('have_pranswer', message.peerContent);
-        } else {
-          this.state = 'queued';
-          this.emit('queued', message.peerContent);
-        }
+        } 
         break;
       case 'ICE_CANDIDATE':
         this.emit('ice_candidate', message.peerContent);
@@ -2871,7 +2877,7 @@ var EndpointProvider =  function EndpointProvider() {
     };
 
     // Create the Endpoint Connection  
-    l('DEBUG') && console.debug(this+'.start() Using config ', config);
+    l('DEBUG') && console.log(this+'.start() Using config ', config);
 
     var connectionConfig =  util.makeCopy(config);
     // everything else is the same config.
@@ -2982,11 +2988,26 @@ var EndpointProvider =  function EndpointProvider() {
         if (endpoint) {
           l('DEBUG') && console.log(endpointProvider+'-on.newsession giving session to Existing Endpoint: ', endpoint);
           endpoint.newSession(session);
-        } else {
+        } else if (endpointProvider.hasEventListener('newendpoint'))  {
+          // create an endpoint and send it to the listener.
           endpoint = endpointProvider.getRtcommEndpoint();
           l('DEBUG') && console.log(endpointProvider+'-on.newsession Created a NEW endpoint for session: ', endpoint);
           endpoint.newSession(session);
           endpointProvider.emit('newendpoint', endpoint);
+        } else {
+          // If there is no 'newendpoint' listener, we really only support 1 endpoint.  pass it to that one,
+          // it will need to respond if its busy.
+          var endpoints = endpointProvider._.endpointRegistry.list();
+          if (endpoints.length > 1) {
+            // Fail the session, we don't know where to send it.
+            session.start();
+            session.fail('Unable to accept inbound call: Busy');
+            console.error(endpointProvider+
+            '-on.newsession - Rejecting session, ambiguous enpdoint selection; add newendpoint callback? ');
+          } else {
+            // Do not emit anything... 
+            endpoints[0].newSession(session);
+          }
         }
       } else {
         console.error(endpointProvider+'-on.newsession - expected a session object to be passed.');
@@ -3794,7 +3815,7 @@ PresenceNode.prototype = util.RtcommBaseObject.extend({
         // If we don't find a node create one.
         if (!n) { 
           // nodes[1] should be a node BELOW us.
-          l('DEBUG') && console.debug(this+'.createSubNode() Creating Node: '+nodes[1]);
+          l('DEBUG') && console.log(this+'.createSubNode() Creating Node: '+nodes[1]);
           n = new PresenceNode(nodes[1]);
           this.nodes.push(n);
         }
@@ -3815,19 +3836,19 @@ PresenceNode.prototype = util.RtcommBaseObject.extend({
     var nodeToDelete = this.findSubNode(nodes);
     // We found the end node
     if (nodeToDelete) {
-      l('DEBUG') && console.debug(this+'.deleteSubNode() Deleting Node: '+nodeToDelete.name);
+      l('DEBUG') && console.log(this+'.deleteSubNode() Deleting Node: '+nodeToDelete.name);
       // have to find its parent.
       var parentNode = this.findSubNode(nodes.slice(0, nodes.length-1));
       var index = parentNode.nodes.indexOf(nodeToDelete);
       // Remove it.
       parentNode.nodes.splice(index,1);
     } else {
-      l('DEBUG') && console.debug(this+'.deleteSubNode() Node not found for topic: '+topic);
+      l('DEBUG') && console.log(this+'.deleteSubNode() Node not found for topic: '+topic);
     }
   },
   addPresence: function addPresence(topic,presenceMessage) {
     var presence = this.getSubNode(topic);
-    l('DEBUG') && console.debug(this+'.addPresence() created node: ', presence);
+    l('DEBUG') && console.log(this+'.addPresence() created node: ', presence);
     presence.record = true;
     if (typeof presenceMessage.self !== 'undefined') {
       presence.self = presenceMessage.self;
@@ -3920,7 +3941,7 @@ PresenceMonitor.prototype = util.RtcommBaseObject.extend((function() {
     // Monitor. Once we are 'Started', we will need to normalize presence here...
     // do we need a timer?  or something to delay emitting the initial event?
     // pull out the topic:
-    l('DEBUG') && console.debug('PresenceMonitor received message: ', message);
+    l('DEBUG') && console.log('PresenceMonitor received message: ', message);
     var endpointID = message.fromEndpointID;
     // Following removes the endpointID, we don't need to do that.
     // var r = new RegExp('(^\/.+)\/'+endpointID+'$');
@@ -4030,7 +4051,7 @@ PresenceMonitor.prototype = util.RtcommBaseObject.extend((function() {
        this._.presenceData = [];
        // Unsubscribe ..
        Object.keys(this._.subscriptions).forEach( function(key) {
-         pm.unsubscribe(key);
+         pm.dependencies.connection.unsubscribe(key);
        });
     }
   } ;
@@ -4514,10 +4535,26 @@ RtcommEndpoint.prototype = util.RtcommBaseObject.extend((function() {
       context.setState('session:ringing');
       context._processMessage(content);
     });
+    /*
+     * this is a bit of a special message... content MAY contain:
+     * content.queuePosition
+     * content.message
+     *
+     * content.message is all we propogate.
+     *
+     */
     session.on('queued', function(content){
       l('DEBUG') && console.log('SigSession callback called to queue: ', content);
-      context.setState('session:queued');
-      context._processMessage(content);
+      var position = 0;
+
+      if (typeof content.queuePosition !== 'undefined') {
+        position = content.queuePosition;
+        context.setState('session:queued',{'queuePosition':position});
+        content = (content.message)? content.message : content
+      } else {
+        context.setState('session:queued');
+        context._processMessage(content);
+      }
     });
     session.on('message', function(content){
       l('DEBUG') && console.log('SigSession callback called to process content: ', content);
@@ -4812,6 +4849,7 @@ return  {
 
   /* This is an event formatter that is called by the prototype emit() to format an event if 
    * it exists
+   * When passed an object, we ammend it w/ eventName and endpoint and pass it along.
    */
   _Event : function Event(event, object) {
       var RtcommEvent =  {
@@ -4872,7 +4910,7 @@ var WebRTCConnection = (function invocation() {
 
     this.config = {
       RTCConfiguration : {iceTransports : "all"},
-      RTCOfferConstraints: null,
+      RTCOfferConstraints: OfferConstraints,
       RTCConstraints : {'optional': [{'DtlsSrtpKeyAgreement': 'true'}]},
       iceServers: [],
       mediaIn: null,
@@ -5064,7 +5102,7 @@ var WebRTCConnection = (function invocation() {
 
     _disconnect: function() {
       if (this.pc && this.pc.signalingState !== 'closed') {
-        l('DEBUG') && console.debug(this+'._disconnect() Closing peer connection');
+        l('DEBUG') && console.log(this+'._disconnect() Closing peer connection');
        this.pc.close();
       }
 
@@ -5101,8 +5139,8 @@ var WebRTCConnection = (function invocation() {
         console.log('PC has a lcoalMediaStream:'+ self.pc.getLocalStreams(), self.pc.getLocalStreams());
         self.pc && self.pc.createAnswer(self._gotAnswer.bind(self), function(error) {
           console.error('failed to create answer', error);
-        }
-        //self.config.RTCOfferConstraints);
+        },
+         self.config.RTCOfferConstraints
         );
       };
       l('DEBUG') && console.log(this+'.accept() -- accepting --');
@@ -5143,17 +5181,21 @@ var WebRTCConnection = (function invocation() {
      *  @param {boolean} broadcast.video
      */
     setBroadcast : function setBroadcast(broadcast) {
-      this.config.broadcast.audio = (broadcast.hasOwnProperty('audio') && typeof broadcast.audio === 'boolean') ?
-        broadcast.audio :
-        this.config.broadcast.audio;
-      this.config.broadcast.video= (broadcast.hasOwnProperty('video') && typeof broadcast.video=== 'boolean') ?
-        broadcast.video:
-        this.config.broadcast.video;
+      this.config.broadcast.audio = (broadcast.hasOwnProperty('audio') && 
+                                     typeof broadcast.audio === 'boolean') ? 
+                                      broadcast.audio :
+                                      this.config.broadcast.audio;
+      this.config.broadcast.video= (broadcast.hasOwnProperty('video') && 
+                                    typeof broadcast.video=== 'boolean') ?
+                                      broadcast.video:
+                                      this.config.broadcast.video;
+      /*
       if (!broadcast.audio && !broadcast.video) { 
         this.config.RTCOfferConstraints= {'mandatory': {OfferToReceiveAudio: true, OfferToReceiveVideo: true}};
       } else {
         this.config.RTCOfferConstraints = null;
       }
+      */
       return this;
     },
     pauseBroadcast: function() {
@@ -5300,8 +5342,11 @@ var WebRTCConnection = (function invocation() {
          *
          */
         // Set our local description
-        isPC && this.pc.setRemoteDescription(new MyRTCSessionDescription(message));
-        this._setState('ringing');
+        //  Only set state to ringing if we have a local offer...
+        if (isPC && this.pc.signalingState === 'have-local-offer') {
+          isPC && this.pc.setRemoteDescription(new MyRTCSessionDescription(message));
+          this._setState('ringing');
+        }
         break;
       case 'answer':
         /*
@@ -5444,7 +5489,7 @@ var WebRTCConnection = (function invocation() {
       this.setBroadcast({audio: audio, video: video});
     } else {
       callback = (typeof options === 'function') ? options : function(success, message) {
-       l('DEBUG') && console.debug(self+'.enableLocalAV() default callback(success='+success+',message='+message);
+       l('DEBUG') && console.log(self+'.enableLocalAV() default callback(success='+success+',message='+message);
       };
       // using current settings.
       audio = this.config.broadcast.audio;
@@ -5482,7 +5527,7 @@ var WebRTCConnection = (function invocation() {
         });
       }
     } else {
-      l('DEBUG') && console.debug(self+'.enableLocalAV() - nothing to do; both audio & video are false');
+      l('DEBUG') && console.log(self+'.enableLocalAV() - nothing to do; both audio & video are false');
     }
   },
 
@@ -5520,10 +5565,10 @@ var WebRTCConnection = (function invocation() {
           url = url.trim();
           var obj = null;
           if (/^stun:/.test(url)) {
-            l('DEBUG') && console.debug(this+'.setIceServers() Is STUN: '+url)
+            l('DEBUG') && console.log(this+'.setIceServers() Is STUN: '+url)
             obj = {'url': url};
           } else if (/^turn:/.test(url)) {
-            l('DEBUG') && console.debug(this+'.setIceServers() Is TURN: '+url)
+            l('DEBUG') && console.log(this+'.setIceServers() Is TURN: '+url)
             obj = buildTURNobject(url);
           } else {
             l('DEBUG') && console.error('Failed to match anything, bad Ice URL: '+url)
