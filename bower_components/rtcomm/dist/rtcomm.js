@@ -37,13 +37,14 @@
    * @exports RTCommHubProvider
    */
 
+var VERSION = 'v1.0.0-beta-20141215120628';
 /** 
  * @namespace
  * @memberof module:rtcomm
  * @private
  */
 var util = (function() {
-
+  var VERSION= 'v1.0.0-beta-20141215120628';
   /*
  * Copyright 2014 IBM Corp.
  *
@@ -470,7 +471,7 @@ var RtcommEvent = function RtcommEvent() {
  * @private
  */
 var connection = (function() {
-
+  var VERSION= 'v1.0.0-beta-20141215120628';
   /*
  * Copyright 2014 IBM Corp.
  *
@@ -3609,6 +3610,8 @@ var logging = new util.Log(),
     /*global log: false */
     log = logging.log;
 
+console.log('**** rtcomm.js --> '+VERSION);
+
 /* function log() {
           // I want to log CallingObject[id].method Message [possibly an object]
 
@@ -4657,6 +4660,9 @@ return  {
       } else if (content.type === 'refer') {
         this._.referralSession && this._.referralSession.pranswer();
         this.setState('session:refer');
+      } else if (content.type === 'pranswer'){
+        // Do nothing w/ it, we've already changed state here... chat/webrtc don't care about it right now.
+        l('DEBUG') && console.log('Pranswer in RtcommEndpoint.  ');
       } else {
         if (this.config.webrtc && this.webrtc) { 
           // calling enable will enable if not already enabled... 
