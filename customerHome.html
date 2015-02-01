@@ -66,12 +66,12 @@
     </div>
 
     <div ng-controller="RtcommConfigController" ng-init="init('customerConfig.json')"></div>
-    <div ng-controller="RtcommAlertController"  ng-init="init(true)"></div>
+    <div ng-controller="RtcommAlertModalController"  ng-init="init(true)"></div>
 
     <!-- Begin page content-->
 	<div class="row">
 		<div class="col-md-2 nopaddng-right vertical-stretch"></div>
-		<div class="col-md-8 nopaddng-right vertical-stretch">
+		<div class="col-md-8 nopaddng-right">
 			<rtcomm-endpoint ng-init="init(false)" ng-hide="!displayEndpoint">
 				<div class="row">
 					<div>

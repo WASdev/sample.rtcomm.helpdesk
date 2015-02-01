@@ -61,14 +61,13 @@
     </div>
     
     <div ng-controller="RtcommConfigController" ng-init="init('agentConfig.json')"></div>
-    <div ng-controller="RtcommAlertController"></div>
+    <div ng-controller="RtcommAlertModalController"></div>
 
  	<div class="container-fluid">
 		<div class="row">
 			<div class="col-md-2">
 			
-				<!-- Can init here without user input if the userid is known when the page is loaded. -->	
-		        <rtcomm-register ng-init="init('')"></rtcomm-register>
+		        <rtcomm-register></rtcomm-register>
 
 				<!-- The first boolean in this init tells the queue controller to auto join any available queues. -->
 				<!-- The second boolean in this init tell the queue controller to publish queue information in its presence doc.-->
