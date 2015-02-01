@@ -36,22 +36,7 @@ If deploying this application to a J2EE application server like WebSphere, you w
 The home page for the helpdesk sample application is index.html which is located in the root directory of this repository. From here you can enter the demo as either a customer or agent. The HTML associated with the client and agent are also contained in the root directory.
 
 ## Application Structure
-This application was built using Angular.js, Bootstrap and jQuery, along with the Rtcomm clientjs library and an Rtcomm Angular.js module. The application is organized as follows:
-
-root/ - Contains the index.html, sample JSON config files and other HTML pages related to this dmeo.  
--bower_components/
---angular/ - The angular related components
---angular-bootstrap/ - The angular related ui components 
---angular-modal-service/ - modal service built on angular. Will soon be removed because angular-bootstrap now has a modal.
---angular-tree-control/ - tree control built on angular.js
---boostrap/ - The bootstrap related components  
---jquery/ - The jquery related components  
--js/  
---libs/  
----rtcomm/ - The rtcomm related js components including angular directives, services, rtcomm lib and mqtt lib.  
--templates/  
---rtcomm/ - rtcomm angular templates  
----css/ - style sheet for rtcomm angular templates.
+This application was built using Angular.js, Bootstrap and jQuery, along with the Rtcomm clientjs library and an Rtcomm Angular.js module. 
 
 ## Debugging Application 
 To enable debug tracing in the rtcomm angular module open the [rtcomm-services.js](https://github.com/WASdev/sample.rtcomm.helpdesk/blob/develop/js/libs/rtcomm/rtcomm-services.js) file and change:
