@@ -14,21 +14,17 @@
  * limitations under the License.
  */ 
  
- #endpointContainer {
-  background-color: #fff;
-  border: 1px solid #428bca;
-  border-radius: 4px;
-}
-
 /* Video window related css */
 #videoContainer {
-  width: 90%;
-  height:90%;
-  margin-left: auto;
-  margin-right:auto; 
+  position: relative;
+  left:0;
+  right:0;
+  top:0;
+  bottom:0;
   background-color: #fff;
 }
 
+/* ID dictates the style */
 #selfViewContainer {
   position:absolute;
   top: 3%;
@@ -39,56 +35,19 @@
   z-index: 5;
 }
 
+/* Class dictates the style */
 .selfView {
   width: 100%;
   height: 100%;
 }
 
+/* Class dictates the style */
 .remoteView {
-    position: relative;
     min-width: 160px; 
   	min-height: 120px;
 	max-height: 100%;
  	width:100%;
     z-index: 1;
-}
-
-/* Chat related css */
-.presence
-{
-    list-style: none;
-    /* margin: 0;
-    padding: 0; */
-}
-
-.presence li
-{
-    margin-bottom: 10px;
-    /*padding-bottom: 5px;*/
-    /*border-bottom: 1px dotted #B3A9A9;*/
-}
-
-.presence li .presence-body p
-{
-    /*margin: 0;*/
-    color: #777777;
-}
-
-.panel-presence
-{
-    margin: 0;
-    height: 100%;
-    border: 1px solid #428bca;
-    border-radius: 4px;
-}
-
-.panel-presence-body
-{
-	overflow-y: scroll;
-	height: 300px;
-    background-color: white;
-    margin: 1;
-	border-radius: 4px;
 }
 
 /* Chat related css */
@@ -123,8 +82,7 @@
 .panel-body
 {
 	overflow-y: scroll;
-	height: 400px;
-/*	height: 80%; */
+	height: 300px;
     background-color: white;
     margin: 5px;
 }
@@ -152,7 +110,7 @@
     background-color: #555;
 }
 
-.endpoint-controls  {
+.endpoint-status  {
     width: 100%;
     height: 50px;
     z-index: 5;
@@ -160,7 +118,8 @@
     color: white;
 	border-radius: 4px;
 	border: 1px solid #428bca;
-	
+	padding-top: 2px;
+    padding-bottom: 2px;
 }
 
 .session-manager  {
@@ -172,6 +131,11 @@
     border-radius: 4px;
     border: 1px solid #428bca;
 }
+
+.session-manager-buttom  {
+    padding-left: 2px;
+}
+
 
 .session-mgr-container{
   border: 1px solid black;
@@ -204,5 +168,7 @@
 
 .rtcomm-iframe
 {
-	height: 650px;	
+	overflow: scroll;
+    width: 100%;
+    height: 700px;
 }
