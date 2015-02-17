@@ -125,6 +125,7 @@ rtcommModule.factory('RtcommService', ["$rootScope", "RtcommConfig", "$log", "$h
 	  var _selfView = "selfView";		//	Default self view
 	  var _remoteView = "remoteView";	//	Default remote view
 
+	  
 	  /*
 	  myEndpointProvider.setLogLevel('DEBUG');
 	  myEndpointProvider.setLogLevel('MESSAGE');

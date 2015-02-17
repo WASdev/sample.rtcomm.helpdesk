@@ -1,6 +1,7 @@
 customerModule.controller("CallAgentCtrl", function($scope, $log, $modal, CustomerService, RtcommService) {
 	$scope.agent = CustomerService.agentCall;
-	$scope.sessionEndpointID = null;
+	$scope.activeEndpointID = RtcommService.getActiveEndpoint();
+
 	
     $scope.calleeID = null;
     $scope.callerID = null;
@@ -15,7 +16,11 @@ customerModule.controller("CallAgentCtrl", function($scope, $log, $modal, Custom
 	   	 else
 	   		 $scope.enableCallModel = false;
    });
-	
+    
+    $scope.$on('endpointActivated', function (event, endpointUUID) {
+    	$scope.activeEndpointID = endpointUUID;
+    });
+
 	$scope.visible=CustomerService.agentCallVisible;
 	
 	$scope.$on('session:started', function (event, eventObject) {
@@ -45,7 +50,7 @@ customerModule.controller("CallAgentCtrl", function($scope, $log, $modal, Custom
 		            }
 		            
 					CustomerService.setVisible(true);
-		            $scope.sessionEndpointID = RtcommService.placeCall($scope.calleeID, $scope.mediaToEnable);
+		            $scope.activeEndpointID = RtcommService.placeCall($scope.calleeID, $scope.mediaToEnable);
 		     	}, 
 		     	function () {
 		     		$log.info('Modal dismissed at: ' + new Date());
@@ -53,13 +58,13 @@ customerModule.controller("CallAgentCtrl", function($scope, $log, $modal, Custom
 	};
 	
 	$scope.disconnectCall = function (){
-		var endpoint = RtcommService.getEndpoint($scope.sessionEndpointID);
+		var endpoint = RtcommService.getEndpoint($scope.activeEndpointID);
 		
 		if (endpoint)
 			endpoint.disconnect();
 		
 	  	CustomerService.setVisible(false);
-	  	$scope.sessionEndpointID = null;
+	  	$scope.activeEndpointID = null;
 	};
 });
 
