@@ -1,7 +1,7 @@
 {
-  "server" : "messagesight.demos.ibm.com",
+  "server" : "replaceme",
 	"port" : 1883,
-	"rtcommTopicPath" : "/rtcommHelpdesk-1234/",
+	"rtcommTopicPath" : "/replacemewithsomethingunique/",
 	"broadcastAudio" : true,
 	"broadcastVideo" : true,
 	"presenceTopic" : "customers"
