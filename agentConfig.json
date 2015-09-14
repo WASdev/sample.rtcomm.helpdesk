@@ -1,8 +1,8 @@
 {
-    "server" : "192.84.45.43",
+  "server" : "replaceme",
 	"port" : 1883,
-	"rtcommTopicPath" : "/rtcommDemo/",
-    "userid" : "",
+	"rtcommTopicPath" : "/replacemewithsomethingunique/",
+  "userid" : "",
 	"broadcastAudio" : true,
 	"broadcastVideo" : true,
 	"presenceTopic" : "agents"
