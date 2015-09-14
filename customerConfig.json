@@ -1,7 +1,7 @@
 {
-    "server" : "192.84.45.43",
+  "server" : "messagesight.demos.ibm.com",
 	"port" : 1883,
-	"rtcommTopicPath" : "/rtcommDemo/",
+	"rtcommTopicPath" : "/rtcommHelpdesk-1234/",
 	"broadcastAudio" : true,
 	"broadcastVideo" : true,
 	"presenceTopic" : "customers"
