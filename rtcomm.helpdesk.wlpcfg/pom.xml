@@ -75,6 +75,7 @@
                 <acceptLicense>true</acceptLicense>
                 <feature>rtcomm-1.0</feature>
                 <feature>ssl-1.0</feature>
+                <feature>websocket-1.1</feature>
                 <feature>appSecurity-2.0</feature>
                 <feature>localConnector-1.0</feature>
               </features>
