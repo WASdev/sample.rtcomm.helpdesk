@@ -2,13 +2,13 @@ customerModule.controller("CallAgentCtrl", function($scope, $log, $modal, Custom
 	$scope.agent = CustomerService.agentCall;
 	$scope.activeEndpointID = RtcommService.getActiveEndpoint();
 
-	
+
     $scope.calleeID = null;
     $scope.callerID = null;
-	
+
     $scope.enableCallModel = false;
     $scope.mediaToEnable = ['chat'];
-	
+
     $scope.$on('rtcomm::init', function (event, success, details) {
 		$log.debug('CallAgentCtrl: rtcomm::init: success = ' + success);
 	   	 if (success == true)
@@ -16,13 +16,13 @@ customerModule.controller("CallAgentCtrl", function($scope, $log, $modal, Custom
 	   	 else
 	   		 $scope.enableCallModel = false;
    });
-    
+
     $scope.$on('endpointActivated', function (event, endpointUUID) {
     	$scope.activeEndpointID = endpointUUID;
     });
 
 	$scope.visible=CustomerService.agentCallVisible;
-	
+
 	$scope.$on('session:started', function (event, eventObject) {
 	    $scope.enableCallModel = false;
     });
@@ -30,8 +30,8 @@ customerModule.controller("CallAgentCtrl", function($scope, $log, $modal, Custom
 	$scope.$on('session:stopped', function (event, eventObject) {
 	    $scope.enableCallModel = true;
 	    CustomerService.setVisible(false);
-    });	
-	
+    });
+
 	$scope.placeCall = function (calleeID){
 		$scope.calleeID = calleeID;
 
@@ -40,7 +40,7 @@ customerModule.controller("CallAgentCtrl", function($scope, $log, $modal, Custom
 			  controller: 'CallModalInstanceCtrl',
 			  resolve: {}
 		    	});
-	
+
 		    modalInstance.result.then(
 		    	function (resultName) {
 		            //	This is used to set an alias when the endoint is not defined.
@@ -48,27 +48,27 @@ customerModule.controller("CallAgentCtrl", function($scope, $log, $modal, Custom
 		            	$scope.callerID = resultName;
 		            	RtcommService.setAlias(resultName);
 		            }
-		            
+
 					CustomerService.setVisible(true);
 		            $scope.activeEndpointID = RtcommService.placeCall($scope.calleeID, $scope.mediaToEnable);
-		     	}, 
+		     	},
 		     	function () {
 		     		$log.info('Modal dismissed at: ' + new Date());
-		    });		
+		    });
 	};
-	
+
 	$scope.disconnectCall = function (){
 		var endpoint = RtcommService.getEndpoint($scope.activeEndpointID);
-		
+
 		if (endpoint)
 			endpoint.disconnect();
-		
+
 	  	CustomerService.setVisible(false);
 	  	$scope.activeEndpointID = null;
 	};
 });
 
-rtcommModule.controller('CallModalInstanceCtrl', ['$scope',  '$modalInstance', function ($scope, $modalInstance) {
+customerModule.controller('CallModalInstanceCtrl', ['$scope',  '$modalInstance', function ($scope, $modalInstance) {
 
 	  $scope.endpointAlias = '';
 
@@ -80,5 +80,3 @@ rtcommModule.controller('CallModalInstanceCtrl', ['$scope',  '$modalInstance', f
 	    $modalInstance.dismiss('cancel');
 	  };
 }]);
-
-
