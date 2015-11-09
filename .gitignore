@@ -2,4 +2,13 @@ META-INF
 WEB-INF
 .project
 node_modules
-/bower_components/
+./bower_components/
+.classpath
+.factorypath
+.settings
+./bin/
+./build
+.settings
+.plxarc
+target/
+*.swp

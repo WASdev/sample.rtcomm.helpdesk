@@ -1,7 +1,7 @@
 {
-  "server" : "replaceme",
+  "server" : "MQTTSERVERHOSTNAME",
 	"port" : 1883,
-	"rtcommTopicPath" : "/replacemewithsomethingunique/",
+	"rtcommTopicPath" : "/RTCOMMTOPICPATH/",
   "userid" : "",
 	"broadcastAudio" : true,
 	"broadcastVideo" : true,
