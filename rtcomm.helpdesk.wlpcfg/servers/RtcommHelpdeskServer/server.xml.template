@@ -10,8 +10,8 @@
   </featureManager>
 
     <!-- To access this server from a remote client add a host attribute to the following element, e.g. host="*" -->
-    <httpEndpoint host="*" httpPort="9080" httpsPort="9443" id="defaultHttpEndpoint"/>
-  
+    <httpEndpoint httpPort="9080" httpsPort="9443" id="defaultHttpEndpoint"/>
+
     <rtcomm messageServerHost="MQTTSERVERHOSTNAME" rtcommTopicPath="/RTCOMMTOPICPATH/" sharedSubscriptionPath="$SharedSubscription/RTCOMMTOPICPATH/"  sharedSubscriptionsEnabled="true">
       <callQueue description="Helpdesk Appliances" signalingTopicName="AppliancesQueueSignaling" topicName="Appliances" callQueueID="Appliances"/>
     </rtcomm>
