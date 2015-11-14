@@ -7,3 +7,4 @@
 /.factorypath
 /target
 /target/*
+**/bower_components/**
