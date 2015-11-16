@@ -119,21 +119,7 @@
                  </action>
                </pluginExecution>
 
-                 <pluginExecution>
-                   <pluginExecutionFilter>
-                     <groupId>org.codehaus.mojo</groupId>
-                     <artifactId>exec-maven-plugin</artifactId>
-                     <versionRange>[1.4.0,]</versionRange>
-                     <goals>
-                       <goal>exec</goal>
-                     </goals>
-                   </pluginExecutionFilter>
-                   <action>
-                     <ignore/>
-                   </action>
-                 </pluginExecution>
-
-             </pluginExecutions>
+                   </pluginExecutions>
            </lifecycleMappingMetadata>
          </configuration>
         </plugin>
