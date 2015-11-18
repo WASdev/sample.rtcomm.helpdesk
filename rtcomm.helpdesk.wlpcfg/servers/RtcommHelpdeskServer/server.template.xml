@@ -18,5 +18,5 @@
     <logging traceSpecification="*=info:com.ibm.ws.rtcomm.*=all"/>
     <applicationMonitor updateTrigger="mbean"/>
 
-    <webApplication id="rtcomm-helpdesk" location="rtcomm.helpdesk.app.war" contextRoot="/" name="rtcomm-helpdesk"> </webApplication>
+    <webApplication id="rtcomm.helpdesk.app" location="rtcomm.helpdesk.app.war" contextRoot="/" name="rtcomm.helpdesk.app"> </webApplication>
 </server>

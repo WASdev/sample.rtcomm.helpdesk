@@ -11,7 +11,7 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-	<groupId>sample.rtcomm.helpdesk></groupId>
+	<groupId>sample.rtcomm.helpdesk</groupId>
   <artifactId>rtcomm.helpdesk.app</artifactId>
   <name>RtcommHelpdesk Web Application</name>
   <version>1.0-SNAPSHOT</version>
@@ -26,14 +26,15 @@
      </scm>
   <dependencies>
 
-    <dependency>
+    <!-- <dependency>
       <groupId>com.ibm.tools.target</groupId>
       <artifactId>was-liberty</artifactId>
       <version>LATEST</version>
       <type>pom</type>
       <scope>provided</scope>
-    </dependency>
+    </dependency> -->
   </dependencies>
+
   <profiles>
     <!-- Use local installation of node/npm/bower -->
     <profile>
