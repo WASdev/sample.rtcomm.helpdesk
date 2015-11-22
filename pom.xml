@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 	http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
@@ -12,21 +10,26 @@
   <version>1.0-SNAPSHOT</version>
 
   <licenses>
-      <license>
-          <name>The Apache Software License, Version 2.0</name>
-          <url>https://raw.github.com/WASdev/sample.rtcomm.helpdesk/master/LICENSE</url>
-          <distribution>repo</distribution>
-      </license>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>https://raw.github.com/WASdev/sample.rtcomm.helpdesk/master/LICENSE</url>
+      <distribution>repo</distribution>
+    </license>
   </licenses>
+  <scm>
+    <connection>scm:git:git@github.com:WASdev/sample.rtcomm.helpdesk.git</connection>
+    <developerConnection>scm:git@github.com:WASdev/sample.rtcomm.helpdesk.git</developerConnection>
+    <url>git@github.com:WASdev/sample.rtcomm.helpdesk.git</url>
+  </scm>
 
   <properties>
     <!-- Specify Liberty profile server installation directory -->
-    <!-- <wlp.install.dir>/home/jfmartin/liberty/liberty.runtime.2015.10/</wlp.install.dir> -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
     <mqtt.server.hostname>messagesight.demos.ibm.com</mqtt.server.hostname>
     <rtcomm.topic.path>HDesk-${maven.build.timestamp}</rtcomm.topic.path>
+    <wlp.install.dir></wlp.install.dir>
 
   </properties>
 
@@ -38,7 +41,6 @@
         <artifactId>junit</artifactId>
         <version>4.9</version>
       </dependency>
-
     </dependencies>
   </dependencyManagement>
 
@@ -65,14 +67,13 @@
     </pluginRepository>
   </pluginRepositories>
 
-
   <build>
     <pluginManagement>
       <plugins>
         <plugin>
-            <groupId>net.wasdev.wlp.maven.plugins</groupId>
-            <artifactId>liberty-maven-plugin</artifactId>
-            <version>1.1-SNAPSHOT</version>
+          <groupId>net.wasdev.wlp.maven.plugins</groupId>
+          <artifactId>liberty-maven-plugin</artifactId>
+          <version>1.1</version>
         </plugin>
 
         <plugin>
@@ -82,46 +83,74 @@
         </plugin>
         <!-- Workaround for m2e Eclipse Maven Plugin -->
         <plugin>
-         <groupId>org.eclipse.m2e</groupId>
-         <artifactId>lifecycle-mapping</artifactId>
-         <version>1.0.0</version>
-         <configuration>
-           <lifecycleMappingMetadata>
-             <pluginExecutions>
-               <pluginExecution>
-                 <pluginExecutionFilter>
-                   <groupId>com.google.code.maven-replacer-plugin</groupId>
-                   <artifactId>replacer</artifactId>
-                   <versionRange>[1.5.3,)</versionRange>
-                   <goals>
-                     <goal>replace</goal>
-                   </goals>
-                 </pluginExecutionFilter>
-                 <action>
-                   <ignore/>
-                 </action>
-               </pluginExecution>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>com.google.code.maven-replacer-plugin</groupId>
+                    <artifactId>replacer</artifactId>
+                    <versionRange>[1.5.3,)</versionRange>
+                    <goals>
+                      <goal>replace</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore/>
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>[1.4.0, )</version>
+                    <goals>
+                      <goal>exec</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore/>
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>net.wasdev.wlp.maven.plugins</groupId>
+                    <artifactId>liberty-maven-plugin</artifactId>
+                    <versionRange>[1.1,)</versionRange>
+                    <goals>
+                      <goal>install-feature</goal>
+                      <goal>create-server</goal>
+                      <goal>install-apps</goal>
+                    </goals>
 
-               <pluginExecution>
-                 <pluginExecutionFilter>
-                   <groupId>net.wasdev.wlp.maven.plugins</groupId>
-                   <artifactId>liberty-maven-plugin</artifactId>
-                   <versionRange>[1.1,)</versionRange>
-                   <goals>
-                     <goal>install-feature</goal>
-                     <goal>create-server</goal>
-                     <goal>install-apps</goal>
-                   </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore/>
+                  </action>
+                </pluginExecution>
 
-                 </pluginExecutionFilter>
-                 <action>
-                   <ignore/>
-                 </action>
-               </pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.codehaus.mojo</groupId>
+										<artifactId>properties-maven-plugin</artifactId>
+										<version>1.0-alpha-2</version>
+										<goals>
+											<goal>read-project-properties</goal>
+										</goals>
 
-                   </pluginExecutions>
-           </lifecycleMappingMetadata>
-         </configuration>
+									</pluginExecutionFilter>
+									<action>
+										<ignore/>
+
+									</action>
+								</pluginExecution>
+
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
         </plugin>
 
       </plugins>
@@ -153,7 +182,6 @@
     </plugins>
   </build>
 
-
   <repositories>
     <repository>
       <id>was-repo</id>
@@ -162,9 +190,66 @@
     </repository>
   </repositories>
 
+  <!-- Build Profiles for the Project -->
+  <profiles>
+    <!-- Demo profile -->
+
+    <profile>
+      <id>demo</id>
+      <activation>
+        <file>
+          <missing>${user.dir}/rtcomm.properties</missing>
+        </file>
+      </activation>
+    </profile>
+    <!-- Development Profile -->
+    <!-- Create a file: 'rtcomm.properties' in the root directory of the project that will contain the development properties:
+
+		WLP_INSTALL_DIR=/path/to/liberty
+		RTCOMMTOPICPATH=XXXXXXX
+		MQTTSERVERHOSTNAME=XXXXXX
+	-->
+    <profile>
+      <id>dev</id>
+      <activation>
+        <file>
+          <exists>${user.dir}/rtcomm.properties</exists>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>properties-maven-plugin</artifactId>
+            <version>1.0-alpha-2</version>
+            <executions>
+              <execution>
+                <phase>initialize</phase>
+                <goals>
+                  <goal>read-project-properties</goal>
+                </goals>
+                <configuration>
+                  <files>
+                    <file>${user.dir}/rtcomm.properties</file>
+                  </files>
+                </configuration>
+              </execution>
+            </executions>
+
+          </plugin>
+        </plugins>
+      </build>
+      <properties>
+        <rtcomm.topic.path>${RTCOMMTOPICPATH}</rtcomm.topic.path>
+        <wlp.install.dir>${WLP_INSTALL_DIR}</wlp.install.dir>
+        <mqtt.server.hostname>${MQTTSERVERHOSTNAME}</mqtt.server.hostname>
+      </properties>
+    </profile>
+
+  </profiles>
+
   <modules>
     <module>rtcomm.helpdesk.app</module>
     <module>rtcomm.helpdesk.wlpcfg</module>
   </modules>
 </project>
-z

@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 	http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
@@ -11,50 +9,44 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-	<groupId>sample.rtcomm.helpdesk</groupId>
+  <groupId>sample.rtcomm.helpdesk</groupId>
   <artifactId>rtcomm.helpdesk.app</artifactId>
   <name>RtcommHelpdesk Web Application</name>
   <version>1.0-SNAPSHOT</version>
 
   <packaging>war</packaging>
-	 <url>https://wasdev.github.io</url>
-
-	 <scm>
-         <connection>scm:git:git@github.com:WASdev/sample.rtcomm.helpdesk.git</connection>
-         <developerConnection>scm:git@github.com:WASdev/sample.rtcomm.helpdesk.git</developerConnection>
-         <url>git@github.com:WASdev/sample.rtcomm.helpdesk.git</url>
-     </scm>
-  <dependencies>
-
-    <!-- <dependency>
-      <groupId>com.ibm.tools.target</groupId>
-      <artifactId>was-liberty</artifactId>
-      <version>LATEST</version>
-      <type>pom</type>
-      <scope>provided</scope>
-    </dependency> -->
-  </dependencies>
+  <url>https://wasdev.github.io</url>
 
   <profiles>
+
+    <!-- Build profile when bower_components are already installed -->
+    <profile>
+      <id>frontend.dev</id>
+      <activation>
+
+        <file>
+          <exists>src/main/webapp/bower_components/</exists>
+        </file>
+
+      </activation>
+    </profile>
     <!-- Use local installation of node/npm/bower -->
     <profile>
-      <id>frontend.install</id>
-
+      <id>bower.install</id>
       <activation>
         <property>
           <name>frontend</name>
           <value>install</value>
         </property>
         <activeByDefault>true</activeByDefault>
-
       </activation>
-
       <build>
         <plugins>
 
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
+            <version>1.4.0</version>
             <executions>
               <execution>
                 <phase>generate-sources</phase>
@@ -135,31 +127,6 @@
   <build>
 
     <plugins>
-      <!-- Workaround for m2e Eclipse Maven Plugin -->
-      <plugin>
-        <groupId>org.eclipse.m2e</groupId>
-        <artifactId>lifecycle-mapping</artifactId>
-        <configuration>
-          <lifecycleMappingMetadata>
-            <pluginExecutions>
-              <pluginExecution>
-                <pluginExecutionFilter>
-                  <groupId>org.codehaus.mojo</groupId>
-                  <artifactId>exec-maven-plugin</artifactId>
-
-                  <goals>
-                    <goal>exec</goal>
-                  </goals>
-
-                </pluginExecutionFilter>
-                <action>
-                  <ignore/>
-                </action>
-              </pluginExecution>
-            </pluginExecutions>
-          </lifecycleMappingMetadata>
-        </configuration>
-      </plugin>
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
         <version>3.0.0</version>
@@ -171,6 +138,7 @@
                 <include>**/node_modules/**</include>
                 <include>**/agentConfig.json</include>
                 <include>**/customerConfig.json</include>
+                <include>**/bower_components/**</include>
 
               </includes>
               <followSymlinks>false</followSymlinks>
@@ -186,7 +154,7 @@
         </configuration>
       </plugin>
 
-			<plugin>
+      <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.3</version>
         <configuration>
@@ -201,7 +169,7 @@
         <version>2.6</version>
         <configuration>
           <warSourceExcludes>**/node_modules/**</warSourceExcludes>
-					<failOnMissingWebXml>false</failOnMissingWebXml>
+          <failOnMissingWebXml>false</failOnMissingWebXml>
 
         </configuration>
       </plugin>

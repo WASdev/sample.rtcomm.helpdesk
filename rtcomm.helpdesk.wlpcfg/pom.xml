@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 	http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
@@ -20,7 +18,7 @@
     <wlpUserDir>${basedir}</wlpUserDir>
     <wlpServerName>RtcommHelpdeskServer</wlpServerName>
     <wlpServerDir>${wlpUserDir}/servers/${wlpServerName}</wlpServerDir>
-
+ 		<rtcomm.properties>${basedir}/../rtcomm.properties</rtcomm.properties>
   </properties>
   <dependencies>
     <dependency>
@@ -33,45 +31,6 @@
 
   <build>
     <plugins>
-      <plugin>
-        <groupId>net.wasdev.wlp.maven.plugins</groupId>
-        <artifactId>liberty-maven-plugin</artifactId>
-        <extensions>true</extensions>
-
-        <configuration>
-          <installDirectory>${wlp.install.dir}</installDirectory>
-          <serverName>${wlpServerName}</serverName>
-          <include>usr</include>
-          <userDirectory>${wlpUserDir}</userDirectory>
-          <appsDirectory>apps</appsDirectory>
-          <stripVersion>true</stripVersion>
-
-          <outputDirectory>${project.build.directory}/wlp.output</outputDirectory>
-          <!-- Use custom server.xml -->
-          <configFile>${project.basedir}/${wlpServerDir}/server.xml</configFile>
-        </configuration>
-
-        <executions>
- <execution>
-            <id>install-feature</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>install-feature</goal>
-            </goals>
-            <configuration>
-              <features>
-                <acceptLicense>true</acceptLicense>
-                <feature>rtcomm-1.0</feature>
-                <!-- <feature>ssl-1.0</feature>
-                <feature>websocket-1.1</feature>
-                <feature>appSecurity-2.0</feature>
-                <feature>localConnector-1.0</feature> -->
-              </features>
-            </configuration>
-          </execution>
-        </executions>
-
-      </plugin>
 
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
@@ -104,39 +63,164 @@
           </filesets>
         </configuration>
       </plugin>
+      <plugin>
+
+        <groupId>net.wasdev.wlp.maven.plugins</groupId>
+        <artifactId>liberty-maven-plugin</artifactId>
+        <extensions>true</extensions>
+
+        <configuration>
+          <installDirectory>${wlp.install.dir}</installDirectory>
+          <serverName>${wlpServerName}</serverName>
+          <include>usr</include>
+          <userDirectory>${wlpUserDir}</userDirectory>
+          <appsDirectory>apps</appsDirectory>
+          <stripVersion>true</stripVersion>
+
+          <outputDirectory>${project.build.directory}/wlp.output</outputDirectory>
+          <!-- Use custom server.xml -->
+          <configFile>${project.basedir}/${wlpServerDir}/server.xml</configFile>
+        </configuration>
+
+      </plugin>
 
       <plugin>
         <groupId>com.google.code.maven-replacer-plugin</groupId>
         <artifactId>replacer</artifactId>
         <executions>
-        <execution>
-          <id>replace RTCOMMTOPICPATH and MQTTSERVERHOSTNAME on rtcomm.helpdesk.wlpcfg/servers/RtcommHelpdeskServer/</id>
-          <phase>generate-resources</phase>
-          <goals>
-            <goal>replace</goal>
-          </goals>
-          <configuration>
-            <basedir>${basedir}/servers/RtcommHelpdeskServer/</basedir>
+          <execution>
+            <id>replace RTCOMMTOPICPATH and MQTTSERVERHOSTNAME on rtcomm.helpdesk.wlpcfg/servers/RtcommHelpdeskServer/</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>replace</goal>
+            </goals>
+            <configuration>
+              <basedir>${basedir}/servers/RtcommHelpdeskServer/</basedir>
 
-            <file>server.template.xml</file>
-            <outputFile>
-              server.xml
-            </outputFile>
-            <regex>false</regex>
-            <replacements>
-              <replacement>
-                <token>/RTCOMMTOPICPATH/</token>
-                <value>/${rtcomm.topic.path}/</value>
-              </replacement>
-              <replacement>
-                <token>MQTTSERVERHOSTNAME</token>
-                <value>${mqtt.server.hostname}</value>
-              </replacement>
-            </replacements>
-          </configuration>
-        </execution>
-      </executions>
-    </plugin>
+              <file>server.template.xml</file>
+              <outputFile>
+                server.xml
+              </outputFile>
+              <regex>false</regex>
+              <replacements>
+                <replacement>
+                  <token>/RTCOMMTOPICPATH/</token>
+                  <value>/${rtcomm.topic.path}/</value>
+                </replacement>
+                <replacement>
+                  <token>MQTTSERVERHOSTNAME</token>
+                  <value>${mqtt.server.hostname}</value>
+                </replacement>
+              </replacements>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
+
   </build>
+  <profiles>
+
+    <profile>
+      <id>demo</id>
+
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>net.wasdev.wlp.maven.plugins</groupId>
+            <artifactId>liberty-maven-plugin</artifactId>
+            <extensions>true</extensions>
+
+            <configuration>
+              <installDirectory>${wlp.install.dir}</installDirectory>
+              <serverName>${wlpServerName}</serverName>
+              <include>usr</include>
+              <userDirectory>${wlpUserDir}</userDirectory>
+              <appsDirectory>apps</appsDirectory>
+              <stripVersion>true</stripVersion>
+
+              <outputDirectory>${project.build.directory}/wlp.output</outputDirectory>
+              <!-- Use custom server.xml -->
+              <configFile>${project.basedir}/${wlpServerDir}/server.xml</configFile>
+            </configuration>
+
+            <executions>
+              <execution>
+                <id>install-feature</id>
+                <phase>process-resources</phase>
+                <goals>
+                  <goal>install-feature</goal>
+                </goals>
+                <configuration>
+                  <features>
+                    <acceptLicense>true</acceptLicense>
+                    <feature>rtcomm-1.0</feature>
+                  </features>
+                </configuration>
+              </execution>
+            </executions>
+
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>dev</id>
+
+      <activation>
+        <file>
+          <exists>${rtcomm.properties}</exists>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>properties-maven-plugin</artifactId>
+            <version>1.0-alpha-2</version>
+            <executions>
+              <execution>
+                <phase>initialize</phase>
+                <goals>
+                  <goal>read-project-properties</goal>
+                </goals>
+                <configuration>
+                  <files>
+                    <file>${rtcomm.properties}</file>
+                  </files>
+                </configuration>
+              </execution>
+            </executions>
+
+          </plugin>
+
+
+          <plugin>
+            <groupId>net.wasdev.wlp.maven.plugins</groupId>
+            <artifactId>liberty-maven-plugin</artifactId>
+            <extensions>true</extensions>
+
+            <configuration>
+              <installDirectory>${wlp.install.dir}</installDirectory>
+              <serverName>${wlpServerName}</serverName>
+              <include>usr</include>
+              <userDirectory>${wlpUserDir}</userDirectory>
+              <appsDirectory>apps</appsDirectory>
+              <stripVersion>true</stripVersion>
+
+              <outputDirectory>${project.build.directory}/wlp.output</outputDirectory>
+              <!-- Use custom server.xml -->
+              <configFile>${project.basedir}/${wlpServerDir}/server.xml</configFile>
+            </configuration>
+
+          </plugin>
+        </plugins>
+      </build>
+			<properties>
+				<rtcomm.topic.path>${RTCOMMTOPICPATH}</rtcomm.topic.path>
+				<wlp.install.dir>${WLP_INSTALL_DIR}</wlp.install.dir>
+				<mqtt.server.hostname>${MQTTSERVERHOSTNAME}</mqtt.server.hostname>
+			</properties>
+    </profile>
+  </profiles>
 </project>
