@@ -33,13 +33,14 @@
     <!-- Use local installation of node/npm/bower -->
     <profile>
       <id>bower.install</id>
-      <activation>
-        <property>
-          <name>frontend</name>
-          <value>install</value>
-        </property>
-        <activeByDefault>true</activeByDefault>
-      </activation>
+
+			<activation>
+				<file>
+					<exists>../rtcomm.properties</exists>
+					<missing>src/main/webapp/bower_components</missing>
+				</file>
+			</activation>
+
       <build>
         <plugins>
 
@@ -69,14 +70,12 @@
 
     <!-- Download Node/NPM/Bower locally -->
     <profile>
-      <id>frontend.download</id>
-      <activation>
-        <property>
-          <name>frontend</name>
-          <value>download</value>
-        </property>
+      <id>demo</id>
+			<activation>
+        <file>
+          <missing>../rtcomm.properties</missing>
+        </file>
       </activation>
-
       <build>
         <plugins>
           <plugin>
