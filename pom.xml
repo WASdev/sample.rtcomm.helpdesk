@@ -106,7 +106,7 @@
                   <pluginExecutionFilter>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
-                    <version>[1.4.0, )</version>
+                    <versionRange>[1.4.0, )</versionRange>
                     <goals>
                       <goal>exec</goal>
                     </goals>
@@ -136,7 +136,7 @@
 									<pluginExecutionFilter>
 										<groupId>org.codehaus.mojo</groupId>
 										<artifactId>properties-maven-plugin</artifactId>
-										<version>1.0-alpha-2</version>
+										<versionRange>[1.0-alpha-2,)</versionRange>
 										<goals>
 											<goal>read-project-properties</goal>
 										</goals>
