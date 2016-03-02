@@ -78,7 +78,7 @@
           <appsDirectory>apps</appsDirectory>
           <stripVersion>true</stripVersion>
 
-          <outputDirectory>${project.build.directory}/wlp.output</outputDirectory>
+          <outputDirectory>${wlpUserDir}/wlp.output</outputDirectory>
           <!-- Use custom server.xml -->
           <configFile>${project.basedir}/${wlpServerDir}/server.xml</configFile>
         </configuration>
@@ -106,11 +106,11 @@
               <replacements>
                 <replacement>
                   <token>/RTCOMMTOPICPATH/</token>
-                  <value>/${rtcomm.topic.path}/</value>
+                  <value>/${rtcommTopicPath}/</value>
                 </replacement>
                 <replacement>
                   <token>MQTTSERVERHOSTNAME</token>
-                  <value>${mqtt.server.hostname}</value>
+                  <value>${mqttServerHostname}</value>
                 </replacement>
               </replacements>
             </configuration>
@@ -222,9 +222,9 @@
         </plugins>
       </build>
 			<properties>
-				<rtcomm.topic.path>${RTCOMMTOPICPATH}</rtcomm.topic.path>
+				<rtcommTopicPath>${RTCOMMTOPICPATH}</rtcommTopicPath>
 				<wlp.install.dir>${WLP_INSTALL_DIR}</wlp.install.dir>
-				<mqtt.server.hostname>${MQTTSERVERHOSTNAME}</mqtt.server.hostname>
+				<mqttServerHostname>${MQTTSERVERHOSTNAME}</mqttServerHostname>
 			</properties>
     </profile>
   </profiles>

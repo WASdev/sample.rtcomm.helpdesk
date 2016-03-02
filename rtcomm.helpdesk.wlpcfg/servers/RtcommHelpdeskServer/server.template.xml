@@ -19,6 +19,7 @@
 
     <callQueue callQueueID="Appliances" description="Helpdesk Appliances" signalingTopicName="AppliancesQueueSignaling" topicName="Appliances"/>
   </rtcomm>
+
   <logging traceSpecification="*=info:com.ibm.ws.rtcomm.*=all"/>
   <applicationMonitor updateTrigger="mbean"/>
 

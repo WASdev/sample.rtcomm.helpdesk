@@ -15,7 +15,7 @@
 
 #### Building with Maven
 
-######Import Maven projects into WDT
+###### Import Maven projects into WDT
 
 1. In the *Git Repositories* view, expand the **sample.rtcomm.helpdesk** repo
 2. Right-click on the "Working Directory" folder and select "Copy Path to Clipboard"
@@ -73,7 +73,19 @@
 
 :star: *Note:* Some versions of WDT incorrectly map the cdi-1.2 dependency to the CDI 1.0 Facet, which prevents the *Run As ...* operation in step 2 from succeeding. If this happens, Right-click on the `rtcomm.helpdesk.app` project, and select *Properties*, then select *Project Facets* in the left-hand pane. Change the the "Context and dependency injection (CDI)" facet to use version 1.2, at which point, step 2 (above) should work.
 
-###### Deploying the application to Bluemix
+#### Additional Configurations
+To have the sample change the <code>topic path</code>, <code>MQTT Server</code> or the <code>WebSocket Port</code> define the properties when calling mvn install:
+
+```
+$ mvn install -DrtcommTopicPath=<TOPICPATH> -DmqttServerHostname=<HOSTNAME> -DwebSocketPort=<PORT_NUMBER>
+```
+
+As an example:
+```
+$ mvn install -DrtcommTopicPath=helpdesk -DmqttServerHostname=localhost -DwebSocketPort=8083
+```
+
+<!-- ###### Deploying the application to Bluemix
 
 
 Requires: [IBM Eclipse Tools for Bluemix]
@@ -84,4 +96,4 @@ You'll need to create a Bluemix server:
 3. Select the server type as __IBM Bluemix__, give the server a name
 4. Click _Next_ and enter your credentials
 5. Choose your organization/space
-6. Drag and drop the _RtcommHelpdeskServer.zip_ file (in rtcomm.helpdesk.wlpcfg/servers/RtcommHelpdeskServer/) into the Bluemix server. Fill the Bluemix server information.
+6. Drag and drop the _RtcommHelpdeskServer.zip_ file (in rtcomm.helpdesk.wlpcfg/servers/RtcommHelpdeskServer/) into the Bluemix server. Fill the Bluemix server information. -->

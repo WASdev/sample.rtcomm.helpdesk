@@ -17,6 +17,9 @@
   <packaging>war</packaging>
   <url>https://wasdev.github.io</url>
 
+	<properties>
+		<webSocketPort>1883</webSocketPort> <!--Default Websocket value -->
+	</properties>
   <dependencies>
     <dependency>
       <groupId>org.apache.maven.plugins</groupId>
@@ -128,6 +131,42 @@
       </build>
     </profile>
 
+		<!-- Build profile to Clean completely -->
+
+		<profile>
+			<id>hard</id>
+			<build>
+				<plugins>
+				<plugin>
+	        <artifactId>maven-clean-plugin</artifactId>
+	        <version>3.0.0</version>
+	        <configuration>
+	          <filesets>
+	            <fileset>
+	              <directory>src/main/webapp</directory>
+	              <includes>
+	                <include>**/agentConfig.json</include>
+									<include>**/node_modules/**</include>
+									<include>**/bower_components/**</include>
+	                <include>**/customerConfig.json</include>
+	              </includes>
+	              <followSymlinks>false</followSymlinks>
+	            </fileset>
+	            <fileset>
+	              <directory>./</directory>
+	              <includes>
+	                <include>**/node/**</include>
+	              </includes>
+	              <followSymlinks>false</followSymlinks>
+	            </fileset>
+	          </filesets>
+	        </configuration>
+	      </plugin>
+			</plugins>
+
+			</build>
+		</profile>
+
   </profiles>
 
   <build>
@@ -141,18 +180,8 @@
             <fileset>
               <directory>src/main/webapp</directory>
               <includes>
-                <include>**/node_modules/**</include>
                 <include>**/agentConfig.json</include>
                 <include>**/customerConfig.json</include>
-                <include>**/bower_components/**</include>
-
-              </includes>
-              <followSymlinks>false</followSymlinks>
-            </fileset>
-            <fileset>
-              <directory>./</directory>
-              <includes>
-                <include>**/node/**</include>
               </includes>
               <followSymlinks>false</followSymlinks>
             </fileset>
@@ -196,13 +225,18 @@
               <outputFile>agentConfig.json</outputFile>
               <regex>false</regex>
               <replacements>
+								<replacement>
+									<token>WEBSOCKET_PORT</token>
+									<value>${webSocketPort}</value>
+								</replacement>
                 <replacement>
+
                   <token>/RTCOMMTOPICPATH/</token>
-                  <value>/${rtcomm.topic.path}/</value>
+                  <value>/${rtcommTopicPath}/</value>
                 </replacement>
                 <replacement>
                   <token>MQTTSERVERHOSTNAME</token>
-                  <value>${mqtt.server.hostname}</value>
+                  <value>${mqttServerHostname}</value>
                 </replacement>
               </replacements>
             </configuration>
@@ -220,13 +254,17 @@
               <outputFile>customerConfig.json</outputFile>
               <regex>false</regex>
               <replacements>
+								<replacement>
+									<token>WEBSOCKET_PORT</token>
+									<value>${webSocketPort}</value>
+								</replacement>
                 <replacement>
                   <token>/RTCOMMTOPICPATH/</token>
-                  <value>/${rtcomm.topic.path}/</value>
+                  <value>/${rtcommTopicPath}/</value>
                 </replacement>
                 <replacement>
                   <token>MQTTSERVERHOSTNAME</token>
-                  <value>${mqtt.server.hostname}</value>
+                  <value>${mqttServerHostname}</value>
                 </replacement>
               </replacements>
             </configuration>

@@ -16,6 +16,8 @@ Change to the created project directory and use Maven to build the sample. The f
 $ mvn install
 ```
 
+This may take a few minutes to complete because it installs NodeJS and Websphere Liberty as dependencies.
+
 ##### Building the Sample with a local Liberty installation
 This step can be ignored if you already ran __mvn install__. In order to build the sample with a local Liberty install specify the **wlp.install.dir** (Liberty install directory):
 
@@ -24,26 +26,35 @@ $ mvn install -Dwlp.install.dir=/path/to/installed/wlp
 ```
 
 ### Running the Sample Locally
-The build should have downloaded a Liberty install. You can run the sample by changing to the __rtcomm.helpdesk.wlpcfg__ directory:
+The build should have downloaded a Liberty install. You can run the sample by executing the maven liberty goal, if no MQTT Server is specified, by default it will use <code>messagesight.demos.ibm.com</code> as the MQTT Server.
 
 ```
-$ cd rtcomm.helpdesk.wlpcfg
+$ mvn -f rtcomm.helpdesk.wlpcfg/pom.xml liberty:run-server
 ```
 
-```
-[rtcomm.helpdesk.wclpfg]$ mvn liberty:run-server
-```
 If you used **mvn install** with a local Liberty installation, use the following command to run the server:
 
 ```
-[rtcomm.helpdesk.wclpfg]$ mvn liberty:run-server -Dwlp.install.dir=/path/to/installed/wlp
+mvn -f rtcomm.helpdesk.wlpcfg/pom.xml liberty:run-server -Dwlp.install.dir=/path/to/installed/wlp
 ```
 
- This will run the server on the foreground. Access the sample at: [http://localhost:9080/](http://localhost:9080/)
+This will run the server on the foreground. Access the sample at: [http://localhost:9080/](http://localhost:9080/)
 
-### Deploying the Sample to Bluemix
+### Additional Configurations
+To have the sample change the <code>topic path</code>, <code>MQTT Server</code> or the <code>WebSocket Port</code> define the properties when calling mvn install:
+
+```
+$ mvn install -DrtcommTopicPath=<TOPICPATH> -DmqttServerHostname=<HOSTNAME> -DwebSocketPort=<PORT_NUMBER>
+```
+
+As an example:
+```
+$ mvn install -DrtcommTopicPath=helpdesk -DmqttServerHostname=localhost -DwebSocketPort=8083
+```
+
+<!-- ### Deploying the Sample to Bluemix
 You will need to download and install the [Cloud Foundry command line interface](https://www.ng.bluemix.net/docs/starters/install_cli.html), this can be used to deploy and manage applications on Bluemix. Once the Cloud Foundry tools are installed you can simply push the packaged server:
 
 ```
  $ cf push <appName> -p rtcomm.helpdesk.wlpcfg/servers/RtcommHelpdeskServer/RtcommHelpdeskServer.zip
-```
+``` -->

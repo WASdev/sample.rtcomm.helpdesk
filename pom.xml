@@ -27,8 +27,9 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
-    <mqtt.server.hostname>messagesight.demos.ibm.com</mqtt.server.hostname>
-    <rtcomm.topic.path>HDesk-${maven.build.timestamp}</rtcomm.topic.path>
+    <mqttServerHostname>messagesight.demos.ibm.com</mqttServerHostname>
+    <rtcommTopicPath>HDesk-${maven.build.timestamp}</rtcommTopicPath>
+		<webSocketPort>1883</webSocketPort>
     <wlp.install.dir></wlp.install.dir>
 
   </properties>
@@ -257,9 +258,9 @@
         </plugins>
       </build>
       <properties>
-        <rtcomm.topic.path>${RTCOMMTOPICPATH}</rtcomm.topic.path>
+        <rtcommTopicPath>${RTCOMMTOPICPATH}</rtcommTopicPath>
         <wlp.install.dir>${WLP_INSTALL_DIR}</wlp.install.dir>
-        <mqtt.server.hostname>${MQTTSERVERHOSTNAME}</mqtt.server.hostname>
+        <mqttServerHostname>${MQTTSERVERHOSTNAME}</mqttServerHostname>
       </properties>
     </profile>
 
