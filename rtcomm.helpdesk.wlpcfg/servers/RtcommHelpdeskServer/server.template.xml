@@ -1,0 +1,27 @@
+<server description="new server">
+
+  <!-- Enable features -->
+  <featureManager>
+    <feature>rtcomm-1.0</feature>
+    <feature>websocket-1.1</feature>
+    <feature>appSecurity-2.0</feature>
+    <feature>localConnector-1.0</feature>
+    <feature>servlet-3.1</feature>
+  </featureManager>
+
+  <!-- To access this server from a remote client add a host attribute to the following element, e.g. host="*" -->
+  <httpEndpoint httpPort="9080" httpsPort="9443" id="defaultHttpEndpoint"/>
+
+  <rtcomm messageServerHost="MQTTSERVERHOSTNAME" rtcommTopicPath="/RTCOMMTOPICPATH/" sharedSubscriptionPath="$SharedSubscription/RTCOMMTOPICPATH/" sharedSubscriptionsEnabled="true">
+    <iceServerURL>stun:stun.l.google.com:19302</iceServerURL>
+    <iceServerURL>stun:stun1.l.google.com:19302</iceServerURL>
+    <iceServerURL>stun:stun2.l.google.com:19302</iceServerURL>
+
+    <callQueue callQueueID="Appliances" description="Helpdesk Appliances" signalingTopicName="AppliancesQueueSignaling" topicName="Appliances"/>
+  </rtcomm>
+
+  <logging traceSpecification="*=info:com.ibm.ws.rtcomm.*=all"/>
+  <applicationMonitor updateTrigger="mbean"/>
+
+  <webApplication contextRoot="/" id="rtcomm.helpdesk.app" location="rtcomm.helpdesk.app.war" name="rtcomm.helpdesk.app"></webApplication>
+</server>
