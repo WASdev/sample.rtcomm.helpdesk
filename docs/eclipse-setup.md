@@ -68,7 +68,13 @@
 1. Select the 'rtcomm.helpdesk.app' project
 2. Right-click -> *Run As ... -> Run On Server*
 3. Select the appropiate server (as created above) and select *Finish*
-3. Open the sample at http://localhost:9080/ using either Firefox or Chrome
+4. Open the sample at http://localhost:9080/ using either Firefox or Chrome
+
+If you encounter a validation error running app on the Server:
+1. Open the *Servers* view
+2. Right-click on the server that was created earlier (if you opted out, by default it will contain *RtcommHelpdeskServer* in its name)
+3. Click *Start* to start the Server.
+4. Open the sample at http://localhost:9080/ using either Firefox or Chrome
 
 
 :star: *Note:* Some versions of WDT incorrectly map the cdi-1.2 dependency to the CDI 1.0 Facet, which prevents the *Run As ...* operation in step 2 from succeeding. If this happens, Right-click on the `rtcomm.helpdesk.app` project, and select *Properties*, then select *Project Facets* in the left-hand pane. Change the the "Context and dependency injection (CDI)" facet to use version 1.2, at which point, step 2 (above) should work.
