@@ -269,5 +269,6 @@
   <modules>
     <module>rtcomm.helpdesk.app</module>
     <module>rtcomm.helpdesk.wlpcfg</module>
+    <module>rtcomm.helpdesk.e2e</module>
   </modules>
 </project>

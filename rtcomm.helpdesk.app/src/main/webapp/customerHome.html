@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html lang="en" ng-app="customerModule">
-  <head>
+<html lang="en" ng-app="helpdesk.customer.app">
+
+<head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,112 +10,132 @@
 
     <title>Customer Home Page</title>
 
-	<link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-	<link href="bower_components/angular-tree-control/css/tree-control-attribute.css" rel="stylesheet" type="text/css">
+    <link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="bower_components/angular-tree-control/css/tree-control-attribute.css"
+    rel="stylesheet" type="text/css">
 
 
-	<link href="css/customer.css" rel="stylesheet" type="text/css">
+    <link href="css/customer.css" rel="stylesheet" type="text/css">
 
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-  <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-	<script src="bower_components/angular/angular.js"></script>
-	<script src="bower_components/angular-animate/angular-animate.js"></script>
-	<script	src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
-	<script src="bower_components/angular-tree-control/angular-tree-control.js" type="text/javascript"></script>	
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-animate/angular-animate.js"></script>
+    <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
+    <script src="bower_components/angular-tree-control/angular-tree-control.js" type="text/javascript"></script>
 
-	<!-- These libs are created by IBM -->
-	<link href="bower_components/angular-rtcomm/dist/css/angular-rtcomm.css" rel="stylesheet">
-	<script	src="bower_components/bower-mqttws/mqttws31.js"></script>
-	<script	src="bower_components/webrtc-adapter/adapter.js"></script>
-	<script	src="bower_components/rtcomm/dist/rtcomm.js"></script>
-	<script	src="bower_components/angular-rtcomm/dist/angular-rtcomm.js"></script>
-	
-	<script	src="js/customer-services.js"></script>
-	<script	src="js/customer-directives.js"></script>	
-	<script	src="js/customer-controllers.js"></script>
+    <!-- These libs are created by IBM -->
+    <link href="bower_components/angular-rtcomm/dist/css/angular-rtcomm.css" rel="stylesheet">
+    <script src="bower_components/bower-mqttws/mqttws31.js"></script>
+    <script src="bower_components/webrtc-adapter/adapter.js"></script>
+    <script src="bower_components/rtcomm/dist/rtcomm.js"></script>
+    <script src="bower_components/angular-rtcomm/dist/angular-rtcomm.js"></script>
 
-	<style type="text/css">
-		html {
-		  height: 100%;
-		}
+    <script src="app/customer/customer.module.js"></script>
+    <script src="app/customer/customer.controller.js"></script>
 
-		body {
-			height: 100%;
-			width: 100%;
-			font-family: HelveticaNeue-Light, Arial, sans-serif;
-			padding-top: 60px;
-			padding-bottom: 40px;
-		}
-	</style>
-	
-  </head>
+    <style type="text/css">
+        html {
+            height: 100%;
+        }
+        body {
+            height: 100%;
+            width: 100%;
+            font-family: HelveticaNeue-Light, Arial, sans-serif;
+            padding-top: 60px;
+            padding-bottom: 40px;
+        }
+    </style>
 
-  <body>
+</head>
+
+<body ng-controller="CallAgentController as vm">
     <!-- Fixed navbar -->
-    <div class="navbar navbar-inverse navbar-fixed-top"  ng-controller="CallAgentCtrl" role="navigation">
-      <div class="container-fluid">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="#">Rtcomm HelpDesk Customer</a>
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">Rtcomm HelpDesk Customer</a>
+            </div>
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="index.html">Home</a>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <button id="btn-helpdesk" class='btn btn-default navbar-btn' ng-click="vm.placeCallToQueue('Appliances')"
+                        ng-disabled="!vm.enableCallModal">Helpdesk</button>
+                    </li>
+                </ul>
+            </div>
         </div>
-        <div class="collapse navbar-collapse">
-          <ul class="nav navbar-nav">
-            <li class="active"><a href="index.html">Home</a></li>
-          </ul>
-	      <li>
-			<button id="btn-helpdesk" class='pull-right btn btn-default navbar-btn' ng-click="placeCall('Appliances')" ng-disabled=!enableCallModel>Helpdesk</button>
-	      </li>
-        </div>
-      </div>
     </div>
 
     <div ng-controller="RtcommConfigController" ng-init="init('customerConfig.json')"></div>
-    <div ng-controller="RtcommAlertModalController"  ng-init="init(true)"></div>
-    
+    <div ng-controller="RtcommAlertModalController" ng-init="init(true)"></div>
+
     <!-- This sends the current URL to the agent when joining a call. -->
-    <rtcomm-iframe  ng-hide=true ng-init="init(true)"></rtcomm-iframe>
+    <rtcomm-iframe ng-hide=true ng-init="init(true)"></rtcomm-iframe>
 
     <!-- Begin page content-->
-   <div class="container-fluid">
+    <div class="container-fluid">
         <div class="col-md-1">
-          <ul class="nav nav-sidebar">
-            <li class="active"><a href="#">Dashboard<span class="sr-only">(current)</span></a></li>
-            <li><a href="#">Products</a></li>
-          </ul>
+            <ul class="nav nav-sidebar">
+                <li class="active"><a href="#">Dashboard<span class="sr-only">(current)</span></a>
+                </li>
+                <li><a href="#">Products</a>
+                </li>
+            </ul>
         </div>
-        
-    	<div class="col-md-8" >
-		    <div class="page-header">
-		        <h1>Customer Sample Page</h1>
-      		</div>
-	    	<p class="lead">Product content goes here...</p>
-    	</div>
-    	
-  		<div class="col-md-3 pull-right sidebar-right" ng-controller="CallAgentCtrl">
-			<agent-connect></agent-connect>
-  		</div>
-   </div>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-  </body>
+
+        <div class="col-md-8">
+            <div class="page-header">
+                <h1>Customer Sample Page</h1>
+            </div>
+            <p class="lead">Product content goes here...</p>
+        </div>
+
+        <div class="col-md-3 pull-right sidebar-right">
+
+            <div class="animate-if" ng-if="vm.activeCall">
+                <div class="container-fluid">
+                    <div class="row">
+                        <rtcomm-chat></rtcomm-chat>
+                    </div>
+
+                    <div class="panel panel-primary row" ng-hide="!vm.AVConnected">
+                        <div class="panel-heading">
+                            <span class="glyphicon glyphicon-facetime-video"></span> Video
+                        </div>
+                        <div class="video-panel">
+                            <rtcomm-video></rtcomm-video>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="btn-group-sm pull-left" style='padding: 10px'>
+                            <!-- div ng-controller="RtcommEndpointController" -->
+                            <!-- button id="btnDisconnectEndpoint" class='btn  btn-primary' ng-click="disconnect()" ng-disabled="(sessionState == 'session:stopped' || sessionState == 'session:failed')" -->
+                            <button id="btnDisconnectEndpoint" class='btn  btn-primary' ng-click="vm.disconnectCall()">
+                                <span aria-hidden="true " aria-label="Disconnect ">
+                                Disconnect
+				</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+</body>
+
 </html>
