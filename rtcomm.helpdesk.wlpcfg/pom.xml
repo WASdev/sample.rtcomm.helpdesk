@@ -125,6 +125,45 @@
 			<build>
 				<plugins>
 
+					<plugin>
+
+						<groupId>com.github.eirslett</groupId>
+						<artifactId>frontend-maven-plugin</artifactId>
+						<version>0.0.29</version>
+
+						<executions>
+
+							<!-- Install nodejs + npm -->
+							<execution>
+
+								<id>install node and npm</id>
+
+								<goals>
+									<goal>install-node-and-npm</goal>
+								</goals>
+
+								<configuration>
+									<nodeVersion>v5.3.0</nodeVersion>
+									<npmVersion>3.3.12</npmVersion>
+								</configuration>
+							</execution>
+
+							<!-- Run npm install -->
+							<execution>
+
+								<id>npm install</id>
+								<goals>
+									<goal>npm</goal>
+								</goals>
+
+								<configuration>
+									<arguments>install</arguments>
+								</configuration>
+							</execution>
+
+						</executions>
+					</plugin>
+
 					<!-- Should execute protractor tests here -->
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
