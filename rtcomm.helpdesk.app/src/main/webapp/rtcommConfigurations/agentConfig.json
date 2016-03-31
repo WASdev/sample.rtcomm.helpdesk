@@ -1,0 +1,9 @@
+{
+  "server" : "MQTTSERVERHOSTNAME",
+	"port" : "WEBSOCKET_PORT",
+	"rtcommTopicPath" : "/RTCOMMTOPICPATH/",
+  "userid" : "",
+	"broadcastAudio" : true,
+	"broadcastVideo" : true,
+	"presenceTopic" : "agents"
+}

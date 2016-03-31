@@ -1,9 +1,0 @@
-{
-  "server" : "replaceme",
-	"port" : 1883,
-	"rtcommTopicPath" : "/replacemewithsomethingunique/",
-  "userid" : "",
-	"broadcastAudio" : true,
-	"broadcastVideo" : true,
-	"presenceTopic" : "agents"
-}
