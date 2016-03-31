@@ -20,6 +20,9 @@
   "dependencies": {
     "angular": "~1.4.5",
     "angular-animate": "~1.4.5",
-    "angular-rtcomm": "~1.0.0"
+    "angular-rtcomm": "https://github.com/WASdev/lib.angular-rtcomm.git#develop"
+  },
+  "devDependencies": {
+    "angular-mocks": "~1.4.0"
   }
 }

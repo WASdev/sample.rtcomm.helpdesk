@@ -1,8 +1,0 @@
-{
-  "server" : "replaceme",
-	"port" : 1883,
-	"rtcommTopicPath" : "/replacemewithsomethingunique/",
-	"broadcastAudio" : true,
-	"broadcastVideo" : true,
-	"presenceTopic" : "customers"
-}
