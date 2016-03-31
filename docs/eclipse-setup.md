@@ -27,6 +27,11 @@
   + *rtcomm.helpdesk.wlpcfg* - Liberty server configuration of the sample
   + *sample.rtcomm.helpdesk* - Root directory of the sample
 
+
+##### Configuration
+**Important**: View the configuration section on the home page of the Github repo: [README.MD](../README.md)
+
+
 ###### Run Maven Install
 1. Expand the **sample.rtcomm.helpdesk** project and right-click on sample.rtcomm.helpdesk/pom.xml
 2. *Run As -> Maven Build...*

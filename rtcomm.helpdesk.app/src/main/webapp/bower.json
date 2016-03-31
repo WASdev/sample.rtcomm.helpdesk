@@ -23,6 +23,6 @@
     "angular-rtcomm": "https://github.com/WASdev/lib.angular-rtcomm.git#develop"
   },
   "devDependencies": {
-    "angular-mocks": "~1.5.3"
+    "angular-mocks": "~1.4.0"
   }
 }

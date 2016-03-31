@@ -31,7 +31,7 @@
 		<mqttServerHostname>messagesight.demos.ibm.com</mqttServerHostname>
 		
 		<!--  Change for fixed topic path -->
-		<rtcommTopicPath>helpdesk-${maven.build.timestamp.format}</rtcommTopicPath>
+		<rtcommTopicPath>helpdesk-demo</rtcommTopicPath>
 		
 		<!--  Change the TCP Port to which your Liberty instance will connect -->
 		<mqttServerPort>1883</mqttServerPort>
@@ -170,6 +170,5 @@
 	<modules>
 		<module>rtcomm.helpdesk.app</module>
 		<module>rtcomm.helpdesk.wlpcfg</module>
-		<module>rtcomm.helpdesk.deploy</module>
 	</modules>
 </project>

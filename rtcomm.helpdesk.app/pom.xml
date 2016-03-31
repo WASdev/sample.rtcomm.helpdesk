@@ -122,7 +122,7 @@
 							<basedir>${basedir}/src/main/webapp</basedir>
 
 							<includes>
-								<include>resources/*.json</include>
+								<include>rtcommConfigurations/*.json</include>
 							</includes>
 
 							<preserveDir>false</preserveDir>
