@@ -21,16 +21,16 @@
 module.exports = Agent;
 
 function Agent(_browser) {
-	
+
   this.browser = _browser;
   this.element = _browser.element;
 
   //Enter button on the home page of the sample
   this.enterBtn = this.element(by.id('btnAgent'));
-  
+
   //Register input
   this.registerInput = this.element(by.id('register-input'));
-  
+
   //Register Button
   this.registerBtn = this.element(by.id('btn-register'));
 
@@ -47,7 +47,7 @@ function Agent(_browser) {
   //Chat related functionality
   this.send = this.element(by.id('btn-chat'));
   this.input = this.element(by.model('chatVM.message'));
-  
+
   this.sendChatMessage = function(msg) {
     expect(this.send.isEnabled()).to.eventually.be.true;
 
@@ -68,7 +68,7 @@ function Agent(_browser) {
 
     return chats;
   };
-  
+
   //Click on the 'Enter' button from Agent on the home page and expect the URL to change
   function enter() {
     var self = this;
@@ -84,7 +84,7 @@ function Agent(_browser) {
 
 
   }
-  
+
   function waitForAlertModal() {
 
     this.browser.wait(EC.visibilityOf(this.alertModalOkBtn), 5000);

@@ -18,7 +18,7 @@
   'use strict';
 
   angular
-    .module('helpdesk.customer.app',[
+    .module('helpdesk.customer.app', [
       'angular-rtcomm'
     ]);
 })();

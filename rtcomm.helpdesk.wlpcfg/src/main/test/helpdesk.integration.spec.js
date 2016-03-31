@@ -24,21 +24,22 @@ var Agent = require('./agent.pageobject.js');
 
 describe('E2E Testing: Rtcomm Helpdesk App', function() {
 
-  //Create two browser instances
+  //Retrieve the home page on each test
   beforeEach(function() {
+    //Ignore AngularJS synchronization since on the home page there's no AngularJS
     browser.ignoreSynchronization = true;
 
     browser.get('/');
 
-
   });
+
 
   describe('Customer actions', function() {
     var customerName, customer;
 
 
     beforeEach(function() {
-      //Just a little renaming
+
       customer = new Customer(browser);
       customerName = 'John';
       customer.enter();
@@ -81,10 +82,11 @@ describe('E2E Testing: Rtcomm Helpdesk App', function() {
 
     it('should be able to register', function() {
 
+      //Send name to the register input
       agent.registerInput.sendKeys(agentName);
 
       agent.registerBtn.click();
-
+      //Register button should say 'Unregister'
       agent.browser.driver.wait(function() {
           return agent.registerBtn.getText().then(function(text) {
             return text === 'Unregister';
@@ -92,7 +94,7 @@ describe('E2E Testing: Rtcomm Helpdesk App', function() {
         },
 
         5000,
-        'There was a problem registering the agent');
+        'There was a problem registering the agent, check the client');
 
 
       agent.waitForAlertModal();
@@ -192,8 +194,8 @@ describe('E2E Testing: Rtcomm Helpdesk App', function() {
     });
 
     it('should be able to start a video session', function() {
-    	
-    	//Click enable AV button
+
+      //Click enable AV button
       agent.browser.wait(EC.elementToBeClickable(agent.enableAVBtn), 5000,
         'Enable AV button seems to be disabled or not visible');
 
