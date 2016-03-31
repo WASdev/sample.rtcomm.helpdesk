@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('helpdesk.customer')
+    .module('helpdesk.customer.app')
     .controller('CallAgentController', CallAgentController)
     .controller('CallModalInstanceCtrl', CallModalInstanceCtrl);
 

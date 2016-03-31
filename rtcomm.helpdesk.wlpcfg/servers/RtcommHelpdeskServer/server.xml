@@ -12,7 +12,7 @@
   <!-- To access this server from a remote client add a host attribute to the following element, e.g. host="*" -->
   <httpEndpoint httpPort="9080" httpsPort="9443" id="defaultHttpEndpoint"/>
 
-  <rtcomm messageServerHost="MQTTSERVERHOSTNAME" rtcommTopicPath="/RTCOMMTOPICPATH/" sharedSubscriptionPath="$SharedSubscription/RTCOMMTOPICPATH/" sharedSubscriptionsEnabled="true">
+  <rtcomm messageServerHost="${mqtt.server.hostname}" messageServerPort="${mqtt.server.port}" rtcommTopicPath="/${rtcomm.topic.path}/" sharedSubscriptionPath="$SharedSubscription/${rtcomm.topic.path}/" sharedSubscriptionsEnabled="true">
     <iceServerURL>stun:stun.l.google.com:19302</iceServerURL>
     <iceServerURL>stun:stun1.l.google.com:19302</iceServerURL>
     <iceServerURL>stun:stun2.l.google.com:19302</iceServerURL>

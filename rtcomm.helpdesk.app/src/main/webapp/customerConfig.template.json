@@ -1,8 +1,0 @@
-{
-  "server" : "MQTTSERVERHOSTNAME",
-	"port" : WEBSOCKET_PORT,
-	"rtcommTopicPath" : "/RTCOMMTOPICPATH/",
-	"broadcastAudio" : true,
-	"broadcastVideo" : true,
-	"presenceTopic" : "customers"
-}
