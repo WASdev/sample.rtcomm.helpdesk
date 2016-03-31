@@ -4,7 +4,8 @@
   "description": "Liberty profile configuration",
   "main": "protractor.conf.js",
   "scripts": {
-    "test": "protractor protractor.conf.js"
+  	"postinstall": "node_modules/.bin/webdriver-manager update",
+    "test": "node_modules/.bin/protractor protractor.conf.js"
   },
   "keywords": [
     "protractor",

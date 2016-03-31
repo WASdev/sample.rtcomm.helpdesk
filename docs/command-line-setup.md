@@ -27,6 +27,16 @@ $ mvn install -P-E2E
 
 This may take a few minutes to complete because it installs NodeJS and Websphere Liberty as dependencies.
 
+If there are any server processes running you can stop/clean them by running (this may happen if the build fails while running integration tests):
+
+```bash
+$ mvn clean -PstopServer
+```
+To do a hard clean (remove all the downloaded dependencies such as bower_components, node_modules) run:
+```bash
+$ mvn clean -Phard
+```
+
 ### Running the Sample Locally
 
 The build should have downloaded a Liberty install. You can run the sample by executing the maven liberty goal, if no MQTT Server is specified, by default it will use <code>messagesight.demos.ibm.com</code> as the MQTT Server.
