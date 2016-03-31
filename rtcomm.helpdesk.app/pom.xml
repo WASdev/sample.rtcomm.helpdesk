@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>net.wasdev.wlp.sample</groupId>
 		<artifactId>sample.rtcomm.helpdesk</artifactId>
-		<version>1.0-SNAPSHOT</version>
+		<version>1.0.1-SNAPSHOT</version>
 	</parent>
 
 	<groupId>sample.rtcomm.helpdesk</groupId>
@@ -17,7 +17,21 @@
 
 	<packaging>war</packaging>
 	<url>https://wasdev.github.io</url>
-	
+
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>https://raw.github.com/WASdev/sample.rtcomm.helpdesk/master/LICENSE</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<scm>
+		<connection>scm:git:git@github.com:WASdev/sample.rtcomm.helpdesk.git</connection>
+		<developerConnection>scm:git@github.com:WASdev/sample.rtcomm.helpdesk.git</developerConnection>
+		<url>git@github.com:WASdev/sample.rtcomm.helpdesk.git</url>
+	</scm>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.maven.plugins</groupId>
@@ -110,7 +124,7 @@
 							<includes>
 								<include>resources/*.json</include>
 							</includes>
-				
+
 							<preserveDir>false</preserveDir>
 							<outputDir>.</outputDir>
 							<replacements>
@@ -171,21 +185,17 @@
 						<configuration>
 							<filesets>
 								<fileset>
+									<directory>${basedir}</directory>
+
 									<includes>
-										<!-- <include>**/agentConfig.json</include> -->
 										<include>**/node_modules/**</include>
 										<include>**/bower_components/**</include>
-										<!-- <include>**/customerConfig.json</include> -->
-									</includes>
-									<followSymlinks>false</followSymlinks>
-								</fileset>
-								<fileset>
-									<directory>./</directory>
-									<includes>
 										<include>**/node/**</include>
+
 									</includes>
 									<followSymlinks>false</followSymlinks>
 								</fileset>
+
 							</filesets>
 						</configuration>
 					</plugin>

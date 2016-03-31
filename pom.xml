@@ -7,7 +7,7 @@
 	<artifactId>sample.rtcomm.helpdesk</artifactId>
 	<name>RtcommHelpdesk Application Parent</name>
 	<packaging>pom</packaging>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0.1-SNAPSHOT</version>
 
 	<licenses>
 		<license>
@@ -27,21 +27,21 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-
-		<maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
-		<mqttServerHostname>localhost</mqttServerHostname>
-		<rtcommTopicPath>helpdesk</rtcommTopicPath>
+		<!--  Change to your prefered broker address -->
+		<mqttServerHostname>messagesight.demos.ibm.com</mqttServerHostname>
+		
+		<!--  Change for fixed topic path -->
+		<rtcommTopicPath>helpdesk-${maven.build.timestamp.format}</rtcommTopicPath>
+		
+		<!--  Change the TCP Port to which your Liberty instance will connect -->
 		<mqttServerPort>1883</mqttServerPort>
-
+		
+		<!--  Websocket port the browser client should connect to -->
+		<webSocketPort>1883</webSocketPort>
+		
 		<!-- Liberty server properties -->
 		<wlpServerName>RtcommHelpdeskServer</wlpServerName>
-		<testServerHttpPort>9080</testServerHttpPort>
-		<testServerHttpsPort>9443</testServerHttpsPort>
-		<warName>myArtifactId-application</warName>
-		<warVersion>1.0-SNAPSHOT</warVersion>
-		<!--This is set in the ibm-web-ext.xml file -->
-		<warContext>myLibertyApp</warContext>
-		<webSocketPort>1883</webSocketPort>
+		
 	</properties>
 
 	<!-- Define dependency version information -->
