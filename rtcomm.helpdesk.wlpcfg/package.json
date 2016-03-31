@@ -1,0 +1,23 @@
+{
+  "name": "rtcomm.helpdesk.wlpcfg",
+  "version": "1.0.0",
+  "description": "Liberty profile configuration",
+  "main": "protractor.conf.js",
+  "scripts": {
+    "test": "protractor protractor.conf.js"
+  },
+  "keywords": [
+    "protractor",
+    "liberty",
+    "java",
+    "angularjs"
+  ],
+  "author": "Jose F. Martinez <jfmartin@us.ibm.com>",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-as-promised": "^5.3.0",
+    "mocha": "^2.4.5",
+    "protractor": "^3.2.2"
+  }
+}

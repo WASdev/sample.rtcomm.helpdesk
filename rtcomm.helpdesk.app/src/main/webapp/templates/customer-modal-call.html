@@ -8,12 +8,12 @@
 	  <div class="form-group">
 	    <label for="name" class="col-sm-2 control-label">Name</label>
 	    <div class="col-sm-10">
-	      <input type="text" class="form-control" id="name" placeholder="Your Name" ng-model="endpointAlias">
+	      <input type="text" class="form-control" id="name" placeholder="Your Name" ng-model="vm.endpointAlias">
 	    </div>
 	  </div>
 	</form>
 </div>
 <div class="modal-footer">
-      <button type="button" ng-click="ok()" class="btn btn-default" data-dismiss="modal">Connect</button>
-      <button type="button" ng-click="cancel()" class="btn btn-default" data-dismiss="modal">Cancel</button>
+      <button type="button" ng-click="vm.ok()" class="btn btn-default" data-dismiss="modal">Connect</button>
+      <button type="button" ng-click="vm.cancel()" class="btn btn-default" data-dismiss="modal">Cancel</button>
 </div>
