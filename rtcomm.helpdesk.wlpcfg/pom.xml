@@ -73,6 +73,14 @@
 				<extensions>true</extensions>
 
 				<configuration>
+                    
+                    
+                            <assemblyArtifact>
+                      <groupId>com.ibm.websphere.appserver.runtime</groupId>
+                      <artifactId>wlp-webProfile7</artifactId>
+                      <version>8.5.5.9</version>
+                      <type>zip</type>
+                  </assemblyArtifact>
 					<serverName>${wlpServerName}</serverName>
 
 					<assemblyInstallDirectory>${project.build.directory}</assemblyInstallDirectory>

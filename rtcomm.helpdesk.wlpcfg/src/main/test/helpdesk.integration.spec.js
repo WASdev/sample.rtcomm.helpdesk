@@ -177,6 +177,7 @@ describe('E2E Testing: Rtcomm Helpdesk App', function() {
         else if (message.user === customerName) customer.sendChatMessage(message.message);
         browser.driver.sleep(500); //Wait for each message to be sent
       });
+   
       agent.getChatMessages().then(function(messages) {
         messages.forEach(function(message, index) {
           expect(message.name).to.equal(conversation[index].user, 'Incorrect user match in chat for agent');
@@ -185,9 +186,15 @@ describe('E2E Testing: Rtcomm Helpdesk App', function() {
       });
 
       customer.getChatMessages().then(function(messages) {
+        var SKIP = 0;
         messages.forEach(function(message, index) {
-          expect(message.name).to.equal(conversation[index].user, 'Incorrect user match in chat for customer');
-          expect(message.message).to.equal(conversation[index].message, 'Incorrect message sent in chat for customer');
+          //Forced skip due to first message being an "initiated chat with you"
+         
+          if(SKIP != index){
+
+              expect(message.name).to.equal(conversation[index-1].user, 'Incorrect user match in chat for customer');
+              expect(message.message).to.equal(conversation[index-1].message, 'Incorrect message sent in chat for customer');
+          }
         });
       });
 
